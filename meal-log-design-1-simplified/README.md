@@ -7,7 +7,7 @@ A clickable, phone-sized prototype for logging one meal, built for the CS 6750 i
 
 ## Open it on your computer
 
-Double-click `index.html`. On a laptop you see a phone frame with the test tasks beside it. On a phone the prototype fills the screen; the slim bar at the top has **Tasks** and **Restart**.
+Double-click `index.html`. On a laptop you see a phone frame with the test tasks beside it. On a phone the prototype fills the screen; the slim bar at the top has **Tasks**.
 
 ## Put it online with GitHub Pages (free, public link)
 
