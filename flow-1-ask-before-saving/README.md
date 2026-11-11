@@ -14,7 +14,7 @@ The photo is a draft. After reading it, the app asks one question per food, such
 | 2. Home scrolled | Meal card listing today's meals; no second logging button | Breakfast (logged at 8:30 AM), then Lunch, Evening snack and Dinner marked "Not logged yet". No banner and no Add Meal link |
 | 3. Method sheet | "How do you want to log?", three equally styled tiles with "Best for" hints: Photo ("a single plate"), Search ("packaged food"), Talk ("describing a meal"); close (✕) | As asked. Search and Talk say they are not part of this prototype |
 | 4. Camera | Caption "Everything in the frame is counted. We'll find each food and ask how much you ate."; a slim row above the shutter with one good and one bad example; "Your photos"; close | As asked: "One plate, from above" (good) and "Blurry or dark" (avoid), the same two examples as Flows 2 and 3. "Your photos" holds the tub (today, 12:45 PM), breakfast and yesterday's lunch plate |
-| 5. Analysing | The photo; "Step 2 of 3: estimating amounts, about 10 seconds left"; "Cancel (photo not saved)" | Three steps over 12 s, with a live countdown, and the line "Nothing is saved until you answer" |
+| 5. Analysing | The photo; "Step 2 of 3: estimating amounts, about 10 seconds left"; "Cancel (photo not saved)" | Three steps over 10 s (the same wait in every flow), with a live countdown: step 2 opens with "about 10 seconds left". The line "Nothing is saved until you answer" sits below |
 | 6. Question cards | "1 of 2"; "We counted 14 cream crackers. How many did you eat?"; large 14 with minus and plus; primary "All of them"; "Not this food"; chip "Meal: Lunch (change)"; link "Add a food" | As asked, with a close-up from the photo and the photo's time ("From your photo, today, 12:45 PM"). Card 2 asks about the 6 glucose biscuits |
 | 7. Saved | "Saved 2 foods to lunch"; "Undo" (10-second countdown); "Edit"; primary "See your meal insights" | A sheet over the saved meal, listing both foods with pieces, grams and kcal. "Undo (10)" counts down and disappears at 0 |
 | 8. Insights (top) | *Brief: a top toast "+10 Fitgems for logging lunch". Removed with Fitgems.* | Opens on "Based on the amounts you confirmed", score 4/10 on a scale and "496 of 443 kcal (lunch target)" |
@@ -22,7 +22,7 @@ The photo is a draft. After reading it, the app asks one question per food, such
 
 ## Task 5: yesterday's plate
 
-From "Your photos", yesterday's 1:10 PM plate gives three question cards ("1 of 3"). The plate's foods are weighed, so the questions read "We found about 200 g of rice. How much did you eat?"; the stepper moves 25 g at a time and the button follows it ("All of it", "I ate 100 g"). The meal is saved as Lunch, 9 Oct, 1:10 PM.
+From "Your photos", yesterday's 1:10 PM plate gives three question cards ("1 of 3"). The plate's foods are weighed, so the questions read "We found about 200 g of rice. How much did you eat?"; the stepper moves 25 g at a time and the button follows it ("All of it", "I ate 100 g"). Card 3 asks about aloo gobi; "Not this food" switches it to aloo matar and keeps the 120 g. "Add a food" adds a katori of curd that is not in the photo. The meal is saved as Lunch, 9 Oct, 1:10 PM: 100 g rice, 150 g dal, 120 g aloo matar and 1 katori of curd, 512 kcal ("Saved 4 foods to lunch").
 
 ## Behaviour worth knowing
 

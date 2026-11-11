@@ -22,12 +22,13 @@
    (Fitgems were removed from all three flows.)
    ===================================================================== */
 
-/* 8 s analysis: 0-3 s finding foods, 3-6 s estimating portions, 6-8 s calculating nutrients */
-const STAGES = [{ until: 3, label: 'Finding foods' }, { until: 6, label: 'Estimating portions' }, { until: 8, label: 'Calculating nutrients' }];
-const TOTAL = 8;
-const FOUND_AT = [1.0, 2.2, 2.8];   /* when foods 1, 2 (and 3, on yesterday's plate) appear */
-const COUNT_AT = [4.0, 5.0, 5.6];   /* when their amounts appear */
-const KCAL_AT = 7.0;
+/* 10 s analysis, as in Flows 1 and 3: 0-3.75 s finding foods, 3.75-7.5 s estimating portions,
+   7.5-10 s calculating nutrients */
+const STAGES = [{ until: 3.75, label: 'Finding foods' }, { until: 7.5, label: 'Estimating portions' }, { until: 10, label: 'Calculating nutrients' }];
+const TOTAL = 10;
+const FOUND_AT = [1.25, 2.75, 3.5];   /* when foods 1, 2 (and 3, on yesterday's plate) appear */
+const COUNT_AT = [5.0, 6.25, 7.0];    /* when their amounts appear */
+const KCAL_AT = 8.75;
 
 /* outlines in each photo's own pixels: the tub is 596 x 474, the plate 600 x 480; x, y = centre */
 const TUB = { pw: 596, ph: 474 }; const PLATE = { pw: 600, ph: 480 };

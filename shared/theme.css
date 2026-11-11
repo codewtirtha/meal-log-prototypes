@@ -98,7 +98,8 @@ img { display: block; max-width: 100%; }
 
 /* ===== Stage: task panel + phone frame (laptop) ===== */
 .stage { min-height: 100%; display: flex; align-items: center; justify-content: center; gap: 56px; padding: 16px; }
-.about { width: 340px; color: var(--ink); }
+/* the detailed task list scrolls inside the window, so the phone always stays centred and whole */
+.about { width: 420px; max-height: calc(100vh - 32px); overflow-y: auto; padding-right: 8px; color: var(--ink); }
 .about h2 { font-family: var(--font-head); font-weight: 600; font-size: 20px; margin: 0 0 10px; color: var(--navy); }
 .about ol { margin: 0; padding-left: 22px; font-size: 16px; line-height: 1.5; color: var(--text); }
 .about ol li { margin-bottom: 10px; padding-left: 2px; }

@@ -27,10 +27,12 @@
    8 Card, insights .. "Estimate" tag, labelled lunch target, the verdict as a
                         suggestion
    9 Card, insights .. nutrient bars with labelled targets, directional colours
+                        and the action labels of Flows 1 and 2 ("Eat less carbs",
+                        "Eat more protein")
    (Fitgems were removed from all three flows.)
    ===================================================================== */
 
-const ANALYSIS_MS = 5000;
+const ANALYSIS_MS = 10000;   /* 10 s, as in Flows 1 and 2 */
 
 /* ---------- 1-2 Home ---------- */
 const screens = {};
@@ -116,7 +118,7 @@ function insightsHtml(m) {
   return `<section class="f3-sec" id="insights" aria-labelledby="insH"><div class="f3-insh"><h3 class="h3" id="insH">How this ${mealLower(m.meal)} compares</h3>${basis}</div>
     <div class="f3-target"><span>${esc(mn)} target</span><b>${R.kcal.target} kcal</b></div>
     <div class="advice f3-advice"><span class="ai">${icon('bulb')}</span><div><b>A suggestion</b><p>${esc(suggestion(items, m.meal))}</p></div></div>
-    <div class="nlist">${['kcal', 'carbs', 'protein', 'fat', 'fibre'].map(key => { const r = R[key]; const unit = key === 'kcal' ? 'kcal' : 'g'; return `<div><div class="nrow-top"><span class="nl">${r.label}</span><span class="nv"><b class="num">${r0(r.val)}</b> of ${r.target} ${unit}</span></div>${barHtml(r, key === 'kcal' ? { tlabel: `${mn} target` } : {})}${statusHtml(r, 'status')}</div>`; }).join('')}</div>
+    <div class="nlist">${['kcal', 'carbs', 'protein', 'fat', 'fibre'].map(key => { const r = R[key]; const unit = key === 'kcal' ? 'kcal' : 'g'; return `<div><div class="nrow-top"><span class="nl">${r.label}</span><span class="nv"><b class="num">${r0(r.val)}</b> of ${r.target} ${unit}</span></div>${barHtml(r, key === 'kcal' ? { tlabel: `${mn} target` } : {})}${statusHtml(r, 'act')}</div>`; }).join('')}</div>
   </section>`;
 }
 screens.card = () => {

@@ -13,8 +13,11 @@ Usage:
 
 OUT_DIR defaults to ~/Downloads/meal-log-prototype-screenshots. One folder per
 flow is written inside it, plus a board image with screens 1-9 left to right.
-Files named "Task 5 ..." show the mixed-plate task (yesterday's rice, dal and
-aloo gobi), which is the same in every flow.
+Files named "Screen ..." show the brief's data (all 14 cream crackers saved:
+496 of 443 kcal, food score 4 out of 10); these make up the board. Files named
+"Task 1 ..." follow task 1 (10 of the 14 crackers, 396 kcal) and files named
+"Task 5 ..." follow task 5 (yesterday's plate: half the rice, aloo matar instead
+of aloo gobi, and a katori of curd added: 512 kcal).
 With --previews, each flow folder's preview.jpg (the 3 x 3 grid shown in its
 README) is refreshed too.
 """
@@ -51,6 +54,17 @@ CHANGE_FIRST = "for (let i = 0; i < {n}; i++) PROTO.act('qty', {{id: PROTO.S.dra
 # Task 5 (yesterday's plate of rice, dal and aloo gobi) starts from Home in every flow
 PLATE = "PROTO.act('pickPhoto', {k: 'thali'})"
 
+# Reload the page: every flow starts again from Home with nothing logged today.
+RELOAD = "RELOAD"
+# Task 1 (10 of the 14 cream crackers) starts from Home after a reload
+TUB = "PROTO.act('pickPhoto', {k: 'tub'})"
+SWAP_SABZI = "PROTO.act('{act}', {{id: PROTO.S.draft.items[2].id, k: 'aloo_matar'}})"
+CURD = "PROTO.act('addFood', {k: 'curd'})"
+
+# Files named "Screen ..." follow the brief's data: all 14 cream crackers and 6 glucose
+# biscuits are saved, so the insights show 496 of 443 kcal and a food score of 4 out of 10.
+# These are the screens put on the "Screens 1-9" board. Files named "Task 1 ..." and
+# "Task 5 ..." follow those test tasks.
 FLOWS = {
     1: {
         "folder": "flow-1-ask-before-saving",
@@ -61,23 +75,30 @@ FLOWS = {
             ("Screen 3 - How do you want to log", "PROTO.act('openLog')", 3),
             ("Screen 4 - Camera", "PROTO.act('method', {m: 'photo'})", 4),
             ("Screen 4b - Your photos", "PROTO.act('gallery')", None),
-            ("Screen 5 - Analysing, step 2 of 3", "PROTO.act('pickPhoto', {k: 'tub'}); PROTO.S.an.el = 2; PROTO.render()", 5),
+            ("Screen 5 - Analysing, step 2 of 3", TUB + "; PROTO.S.an.el = 0.5; PROTO.render()", 5),
             ("Screen 6a - Question 1 of 2, cream crackers", "PROTO.act('finishAnalysis')", 6),
             ("Screen 6b - Not this food", "PROTO.act('notThis', {id: PROTO.S.draft.items[0].id})", None),
-            ("Screen 6c - Question 1 of 2, changed to 10", "PROTO.closeSheet(); " + CHANGE_FIRST.format(n=4, d=-1), None),
-            ("Screen 6d - Question 2 of 2, glucose biscuits", "PROTO.act('answer')", None),
+            ("Screen 6c - Question 2 of 2, glucose biscuits", "PROTO.closeSheet(); PROTO.act('answer')", None),
             ("Screen 7 - Saved, with a 10-second Undo", "PROTO.act('answer')", 7),
             ("Screen 8 - Insights, score and calories", "PROTO.act('seeInsights')", 8),
             ("Screen 9 - Insights, nutrients", SCROLL_TO.format(sel=".f1-nutr", off=16), 9),
             ("Screen 9b - Insights, end", SCROLL_END, None),
             ("Extra - Home after logging", "PROTO.act('insBack'); " + SCROLL_TO.format(sel="#mealCard", off=150), None),
-            ("Task 5a - Analysing yesterday's plate", "PROTO.act('openLog'); PROTO.act('method', {m: 'photo'}); " + PLATE + "; PROTO.S.an.el = 2; PROTO.render()", None),
+            ("", RELOAD, None),
+            ("Task 1a - Question 1 of 2, changed to 10", "PROTO.act('openLog'); PROTO.act('method', {m: 'photo'}); " + TUB + "; PROTO.act('finishAnalysis'); " + CHANGE_FIRST.format(n=4, d=-1), None),
+            ("Task 1b - Saved", "PROTO.act('answer'); PROTO.act('answer')", None),
+            ("Task 1c - Insights", "PROTO.act('seeInsights')", None),
+            ("Task 1d - Insights, nutrients", SCROLL_TO.format(sel=".f1-nutr", off=16), None),
+            ("Task 5a - Analysing yesterday's plate", "PROTO.act('insBack'); PROTO.act('openLog'); PROTO.act('method', {m: 'photo'}); " + PLATE + "; PROTO.S.an.el = 3; PROTO.render()", None),
             ("Task 5b - Question 1 of 3, rice", "PROTO.act('finishAnalysis')", None),
             ("Task 5c - Question 1 of 3, changed to 100 g", CHANGE_FIRST.format(n=4, d=-1), None),
             ("Task 5d - Question 3 of 3, aloo gobi", "PROTO.act('answer'); PROTO.act('answer')", None),
-            ("Task 5e - Saved", "PROTO.act('answer')", None),
-            ("Task 5f - Insights", "PROTO.act('seeInsights')", None),
-            ("Task 5g - Insights, nutrients", SCROLL_TO.format(sel=".f1-nutr", off=16), None),
+            ("Task 5e - Not this food, look-alikes", "PROTO.act('notThis', {id: PROTO.S.draft.items[2].id})", None),
+            ("Task 5f - Question 3 of 3, changed to aloo matar", SWAP_SABZI.format(act="swapFood"), None),
+            ("Task 5g - Add a food", "PROTO.hideToast(); PROTO.act('addFoodOpen')", None),
+            ("Task 5h - Saved, with curd added", CURD + "; PROTO.act('answer')", None),
+            ("Task 5i - Insights", "PROTO.act('seeInsights')", None),
+            ("Task 5j - Insights, nutrients", SCROLL_TO.format(sel=".f1-nutr", off=16), None),
         ],
     },
     2: {
@@ -90,21 +111,28 @@ FLOWS = {
             ("Screen 4 - Camera with outlines", "PROTO.act('method', {m: 'photo'})", 4),
             ("Screen 4b - Photo tips", "PROTO.act('tips')", None),
             ("Screen 4c - Your photos", "PROTO.act('gallery')", None),
-            ("Screen 5 - Analysing, foods appearing", "PROTO.act('pickPhoto', {k: 'tub'}); PROTO.S.an.el = 4.2; PROTO.render()", 5),
+            ("Screen 5 - Analysing, foods appearing", TUB + "; PROTO.S.an.el = 5.25; PROTO.render()", 5),
             ("Screen 6a - Review", "PROTO.act('finishAnalysis')", 6),
             ("Screen 6b - Review, foods", SCROLL_TO.format(sel="#rows", off=12), None),
-            ("Screen 6c - Review, crackers changed to 10", CHANGE_FIRST.format(n=4, d=-1), None),
             ("Screen 7 - Meal saved, with a 10-second Undo", "PROTO.act('save')", 7),
             ("Screen 8 - Insights, estimate", "PROTO.act('seeInsights')", 8),
             ("Screen 9 - Insights, nutrients", SCROLL_TO.format(sel="#nutr", off=12), 9),
             ("Screen 9b - Insights, what we assumed", SCROLL_END, None),
             ("Extra - Home after logging", "PROTO.act('insBack'); " + SCROLL_TO.format(sel="#mealCard", off=150), None),
-            ("Task 5a - Analysing yesterday's plate", "PROTO.act('openLog'); PROTO.act('method', {m: 'photo'}); " + PLATE + "; PROTO.S.an.el = 6; PROTO.render()", None),
+            ("", RELOAD, None),
+            ("Task 1a - Review, crackers changed to 10", "PROTO.act('openLog'); PROTO.act('method', {m: 'photo'}); " + TUB + "; PROTO.act('finishAnalysis'); " + CHANGE_FIRST.format(n=4, d=-1) + "; " + SCROLL_TO.format(sel="#rows", off=12), None),
+            ("Task 1b - Meal saved", "PROTO.act('save')", None),
+            ("Task 1c - Insights", "PROTO.act('seeInsights')", None),
+            ("Task 1d - Insights, nutrients", SCROLL_TO.format(sel="#nutr", off=12), None),
+            ("Task 5a - Analysing yesterday's plate", "PROTO.act('insBack'); PROTO.act('openLog'); PROTO.act('method', {m: 'photo'}); " + PLATE + "; PROTO.S.an.el = 7.5; PROTO.render()", None),
             ("Task 5b - Review", "PROTO.act('finishAnalysis')", None),
             ("Task 5c - Review, rice changed to 100 g", CHANGE_FIRST.format(n=4, d=-1) + "; " + SCROLL_TO.format(sel="#rows", off=12), None),
-            ("Task 5d - Saved", "PROTO.act('save')", None),
-            ("Task 5e - Insights", "PROTO.act('seeInsights')", None),
-            ("Task 5f - Insights, nutrients", SCROLL_TO.format(sel="#nutr", off=12), None),
+            ("Task 5d - Review, changed to aloo matar", SWAP_SABZI.format(act="swap") + "; " + SCROLL_END, None),
+            ("Task 5e - Add food", "PROTO.hideToast(); PROTO.act('addFoodOpen')", None),
+            ("Task 5f - Review, curd added", CURD + "; " + SCROLL_END, None),
+            ("Task 5g - Saved", "PROTO.hideToast(); PROTO.act('save')", None),
+            ("Task 5h - Insights", "PROTO.act('seeInsights')", None),
+            ("Task 5i - Insights, nutrients", SCROLL_TO.format(sel="#nutr", off=12), None),
         ],
     },
     3: {
@@ -118,20 +146,28 @@ FLOWS = {
             ("Screen 4 - Camera", "PROTO.act('takePhoto')", 4),
             ("Screen 4b - Photo tips", "PROTO.act('tips')", None),
             ("Screen 4c - Your recent photos", "PROTO.act('gallery')", None),
-            ("Screen 5 - Meal card, analysing", "PROTO.act('pickPhoto', {k: 'tub'})", 5),
+            ("Screen 5 - Meal card, analysing", TUB, 5),
             ("Screen 6a - Meal card, review", "PROTO.act('finishAnalysis')", 6),
             ("Screen 6b - Not this food, look-alikes", "PROTO.act('notThis', {id: PROTO.S.draft.items[1].id})", None),
-            ("Screen 6c - Meal card, crackers changed to 10, live summary", "PROTO.closeSheet(); " + CHANGE_FIRST.format(n=4, d=-1) + "; " + SCROLL_TO.format(sel="#live", off=200), None),
+            ("Screen 6c - Meal card, live summary", "PROTO.closeSheet(); " + SCROLL_TO.format(sel="#live", off=200), None),
             ("Screen 7 - Meal card, saved, with a 10-second Undo", "PROTO.act('save')", 7),
             ("Screen 8 - Meal card, insights and suggestion", "PROTO.hideToast(); " + SCROLL_TO.format(sel="#insights", off=0), 8),
             ("Screen 9 - Meal card, nutrients", SCROLL_END, 9),
             ("Extra - Home after logging", "PROTO.act('done'); " + SCROLL_TO.format(sel="#mealCard", off=150), None),
-            ("Task 5a - Meal card, analysing yesterday's plate", "PROTO.act('openLog'); PROTO.act('takePhoto'); " + PLATE, None),
+            ("", RELOAD, None),
+            ("Task 1a - Meal card, crackers changed to 10, live summary", "PROTO.act('openLog'); PROTO.act('takePhoto'); " + TUB + "; PROTO.act('finishAnalysis'); " + CHANGE_FIRST.format(n=4, d=-1) + "; " + SCROLL_TO.format(sel="#live", off=200), None),
+            ("Task 1b - Meal card, saved", "PROTO.act('save')", None),
+            ("Task 1c - Meal card, insights", "PROTO.hideToast(); " + SCROLL_TO.format(sel="#insights", off=0), None),
+            ("Task 1d - Meal card, nutrients", SCROLL_END, None),
+            ("Task 5a - Meal card, analysing yesterday's plate", "PROTO.act('done'); PROTO.act('openLog'); PROTO.act('takePhoto'); " + PLATE, None),
             ("Task 5b - Meal card, review", "PROTO.act('finishAnalysis')", None),
             ("Task 5c - Meal card, rice changed to 100 g", CHANGE_FIRST.format(n=4, d=-1) + "; " + SCROLL_TO.format(sel="#live", off=420), None),
-            ("Task 5d - Meal card, saved", "PROTO.act('save')", None),
-            ("Task 5e - Meal card, insights", "PROTO.hideToast(); " + SCROLL_TO.format(sel="#insights", off=0), None),
-            ("Task 5f - Not this food on the plate (via Edit foods)", "PROTO.act('editCard'); PROTO.act('notThis', {id: PROTO.S.draft.items[2].id})", None),
+            ("Task 5d - Not this food, look-alikes", "PROTO.act('notThis', {id: PROTO.S.draft.items[2].id})", None),
+            ("Task 5e - Meal card, changed to aloo matar", SWAP_SABZI.format(act="swapFood") + "; " + SCROLL_TO.format(sel="#live", off=420), None),
+            ("Task 5f - Add food", "PROTO.hideToast(); PROTO.act('addFoodOpen')", None),
+            ("Task 5g - Meal card, curd added, live summary", CURD + "; " + SCROLL_TO.format(sel="#live", off=200), None),
+            ("Task 5h - Meal card, saved", "PROTO.hideToast(); PROTO.act('save')", None),
+            ("Task 5i - Meal card, insights", "PROTO.hideToast(); " + SCROLL_TO.format(sel="#insights", off=0), None),
         ],
     },
 }
@@ -229,6 +265,19 @@ class Chrome:
             shutil.rmtree(self.profile, ignore_errors=True)
 
 
+def wait_for_page(ch):
+    """Wait until the flow page (a new one after a reload) has booted."""
+    for _ in range(100):
+        time.sleep(0.1)
+        try:
+            if ch.js("document.readyState === 'complete' && !!window.PROTO && !window.__beforeReload"):
+                break
+        except RuntimeError:
+            pass
+    # rectangular phone (screenshots of a real phone have no rounded corners)
+    ch.js("document.querySelector('.phone').style.borderRadius = '0'")
+
+
 def shoot_flow(ch, n, out_root, scale):
     spec = FLOWS[n]
     out = out_root / spec["folder"]
@@ -238,17 +287,15 @@ def shoot_flow(ch, n, out_root, scale):
     url = (ROOT / spec["folder"] / "index.html").as_uri() + "#shots"
     ch.send("Emulation.setDeviceMetricsOverride", width=1280, height=960, deviceScaleFactor=scale, mobile=False)
     ch.send("Page.navigate", url=url)
-    for _ in range(100):
-        time.sleep(0.1)
-        try:
-            if ch.js("document.readyState === 'complete' && !!window.PROTO"):
-                break
-        except RuntimeError:
-            pass
-    # rectangular phone (screenshots of a real phone have no rounded corners)
-    ch.js("document.querySelector('.phone').style.borderRadius = '0'")
+    wait_for_page(ch)
     saved = []
     for label, script, slot in spec["steps"]:
+        if script == RELOAD:
+            # start the flow again from Home, with nothing logged today
+            ch.js("window.__beforeReload = true")
+            ch.send("Page.reload")
+            wait_for_page(ch)
+            continue
         if script:
             ch.js(script)
         ch.settle()

@@ -19,8 +19,9 @@
    (Fitgems were removed from all three flows.)
    ===================================================================== */
 
-/* the analysis takes 12 s: 2 s finding foods, 6 s estimating amounts, 4 s calculating nutrients */
-const STAGES = [{ until: 2, label: 'finding foods' }, { until: 8, label: 'estimating amounts' }, { until: 12, label: 'calculating nutrients' }];
+/* the analysis takes 10 s, as in Flows 2 and 3: 0.5 s finding foods, 6 s estimating amounts,
+   3.5 s calculating nutrients, so step 2 opens with "about 10 seconds left" */
+const STAGES = [{ until: 0.5, label: 'finding foods' }, { until: 6.5, label: 'estimating amounts' }, { until: 10, label: 'calculating nutrients' }];
 const TOTAL = STAGES[STAGES.length - 1].until;
 
 const qItems = () => S.draft.items.filter(i => !i.added);

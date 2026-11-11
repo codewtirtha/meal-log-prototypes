@@ -14,11 +14,13 @@ Each flow's README has its nine screens and a screen-by-screen table of what the
 
 ## Test tasks (the same in every flow)
 
-1. Before lunch you took a picture of a tub of biscuits. You ate all the glucose biscuits but only 10 of the 14 cream crackers. Record this lunch in the app.
-2. How did your lunch compare with your lunch target? Find one thing to do differently next time.
-3. You now remember that you ate 12 cream crackers, not 10. Change your saved lunch.
-4. Start logging another meal with a photo, then stop before anything is saved.
-5. Yesterday's lunch was one plate of rice, dal and aloo gobi that you cooked at home. You took a picture of it before eating, and you ate everything except half of the rice. Record yesterday's lunch in the app.
+The tasks are written as detailed instructions; none is phrased as a question. This is the text participants see beside the phone (or under **Tasks** on a phone):
+
+1. It is 1:20 PM on 10 October and you have just finished lunch. Before you started eating, at 12:45 PM, you took a photo of your lunch from above: a clear tub of biscuits holding 14 cream crackers and 6 glucose biscuits. The photo is saved on your phone. You ate all 6 glucose biscuits but only 10 of the 14 cream crackers. Record this lunch in the app so that it shows only what you ate.
+2. Look at how this lunch compared with your lunch target. Find out whether you ate more or fewer calories than your target, which nutrients were above their targets and which were below them, and one thing to do differently at your next lunch.
+3. A few minutes later, you remember that you ate 12 cream crackers, not 10. The 6 glucose biscuits were right. Change the lunch you have already saved so that it shows 12 cream crackers and 6 glucose biscuits.
+4. You start to log another meal with a photo, then change your mind. Begin logging a meal with a photo and stop partway through, so that nothing new is saved and the lunch you logged stays as it is.
+5. Yesterday, 9 October, you cooked lunch at home and ate it from one steel plate of rice, dal and a vegetable. You took a photo of the plate at 1:10 PM, before eating, and it is saved on your phone. The vegetable was aloo matar, not aloo gobi. You ate everything on the plate except half of the rice, and you also had a katori of curd that isn't in the photo. Record yesterday's lunch in the app so that it shows exactly what you ate.
 
 What each task tests, and the right answer to check against:
 
@@ -28,9 +30,9 @@ What each task tests, and the right answer to check against:
 | 2 | Contradictory feedback; over and under shown with arrows, not red (7–9) | Calories within target; carbs over ("Eat less carbs"); protein and fibre under |
 | 3 | No way to fix a saved entry (9) | 12 cream crackers and 6 glucose biscuits, 446 kcal |
 | 4 | No way out of the analysis; fear of losing data (5–7) | Nothing saved |
-| 5 | Multi-dish, home-cooked plates (survey: 68 % and 61 % found these hard); logging after eating | Lunch, 9 Oct, 1:10 PM: 100 g rice, 150 g dal, 120 g aloo gobi, 410 kcal |
+| 5 | Multi-dish, home-cooked plates (survey: 68 % and 61 % found these hard); logging after eating; correcting a food the app named wrongly (Karthik's doughnut, Kabir's "combined two things") and adding a food missing from the photo (Kabir's "Add More") | Lunch, 9 Oct, 1:10 PM: 100 g rice, 150 g dal, 120 g aloo matar and 1 katori of curd, 512 kcal |
 
-On a laptop the tasks sit beside the phone, with the line "Nothing leaves this page and nothing is stored." On a phone the prototype fills the screen and a slim bar at the top has **Tasks**.
+On a laptop the tasks sit beside the phone, with the line "Nothing leaves this page and nothing is stored." If the list is taller than the window, it scrolls on its own, so the phone always stays whole and centred. On a phone the prototype fills the screen and a slim bar at the top has **Tasks**.
 
 ## Scenario data
 
@@ -46,7 +48,7 @@ The per-piece values reproduce these totals exactly. When a participant changes 
 Added for tasks 1 and 5:
 
 - Asha logs after eating. The phone's clock shows 1:20 PM; the tub photo in "Your photos" was taken at 12:45 PM, so the lunch is saved at 12:45 PM. A new photo from the camera is saved at 1:20 PM.
-- Yesterday's lunch (task 5): one steel plate of rice, dal and aloo gobi, photographed at 1:10 PM on 9 Oct ([`shared/img/lunch-plate.svg`](shared/img/lunch-plate.svg)). The app finds rice, about 200 g (260 kcal, "Sure" in Flow 2); dal, about 150 g (160 kcal, "Sure"); aloo gobi, about 120 g (120 kcal, "Check this", with "Aloo matar" and "Mixed vegetable sabzi" as look-alikes). That is 540 kcal; with half the rice it is 410 kcal of the same 443 kcal lunch target.
+- Yesterday's lunch (task 5): one steel plate of rice, dal and aloo gobi, photographed at 1:10 PM on 9 Oct ([`shared/img/lunch-plate.svg`](shared/img/lunch-plate.svg)). The app finds rice, about 200 g (260 kcal, "Sure" in Flow 2); dal, about 150 g (160 kcal, "Sure"); aloo gobi, about 120 g (120 kcal, "Check this", with "Aloo matar" and "Mixed vegetable sabzi" as look-alikes). That is 540 kcal. Task 5's answer (half the rice, aloo matar instead of aloo gobi, and a katori of curd that is not in the photo) is 130 + 160 + 132 + 90 = 512 kcal of the same 443 kcal lunch target. Aloo matar is one of the look-alikes offered for aloo gobi in every flow, and curd is in every flow's "Add a food" list (1 katori, 150 g, 90 kcal).
 - These foods are weighed, not counted: their amounts are in grams and their steppers move 25 g at a time.
 - A meal logged for yesterday is saved on 9 Oct and is not listed on today's Home.
 
@@ -80,7 +82,9 @@ Type: Inter for text and Poppins for headings, as in the app screens. Both are e
 - Amounts are in pieces or grams, never "Number".
 - One filled (navy) primary button per screen.
 - Every sheet and every process has a visible way out: a close (✕), Cancel, Stop or Retake.
+- The analysis of a photo takes 10 seconds in every flow, so time on task can be compared.
 - After saving, Undo lasts 10 seconds in every flow, and its button shows the seconds left: "Undo (10)".
+- The nutrient bars on the insights use the same action labels in every flow: "Eat less carbs", "Eat more protein", "Eat more fibre".
 - Photo tips show the same two examples in every flow: one good ("One plate, from above") and one to avoid ("Blurry or dark").
 - Over target is amber with an up arrow; under target is blue with a down arrow; nothing is red.
 - Bars can run past a marked, labelled target line.
@@ -144,13 +148,19 @@ pip install websocket-client pillow
 python3 tools/take_screenshots.py --previews
 ```
 
-The pictures go to `~/Downloads/meal-log-prototype-screenshots/<flow folder>/`. Files named "Screen …" follow tasks 1 to 3; files named "Task 5 …" show the mixed-plate task. `--previews` also refreshes each flow's `preview.jpg`. The script opens the pages with `#shots` in the address, which pauses the prototype's timers and animations so every screen is captured at a known moment.
+The pictures go to `~/Downloads/meal-log-prototype-screenshots/<flow folder>/`.
+
+- Files named "Screen …" show the brief's data: all 14 cream crackers and 6 glucose biscuits are saved, so the insights read 496 of 443 kcal and a food score of 4 out of 10. These are the screens on the "Screens 1-9" board and in each flow's `preview.jpg`.
+- Files named "Task 1 …" follow task 1 (10 of the 14 crackers: 396 kcal, score 5).
+- Files named "Task 5 …" follow task 5 (yesterday's plate: half the rice, aloo matar instead of aloo gobi, a katori of curd added: 512 kcal, score 7).
+
+`--previews` also refreshes each flow's `preview.jpg`. The script opens the pages with `#shots` in the address, which pauses the prototype's timers and animations so every screen is captured at a known moment.
 
 ## What is real and what is simulated
 
 **Real:** every tap path; counts, grams, calories and nutrients recalculated as amounts change; the food score; Undo (10 seconds) and Edit; the meal's day and time taken from the photo; changing the meal (each meal has its own targets); adding one of five common foods.
 
-**Simulated:** the camera always sees the biscuit tub; "Your photos" offers the tub (today, 12:45 PM), this morning's breakfast (already logged) and yesterday's lunch plate (1:10 PM); recognition always finds the brief's two foods in the tub, and rice, dal and aloo gobi on the plate; the analysis waits a fixed time (Flow 1: 12 s, Flow 2: 8 s, Flow 3: 5 s); the clock shows 1:20 PM on 10 Oct; Search and Talk are not part of these prototypes. Nothing is stored: reloading the page starts again.
+**Simulated:** the camera always sees the biscuit tub; "Your photos" offers the tub (today, 12:45 PM), this morning's breakfast (already logged) and yesterday's lunch plate (1:10 PM); recognition always finds the brief's two foods in the tub, and rice, dal and aloo gobi on the plate; the analysis waits a fixed 10 s in every flow; the clock shows 1:20 PM on 10 Oct; Search and Talk are not part of these prototypes. Nothing is stored: reloading the page starts again.
 
 ## How the food score is worked out
 
@@ -159,7 +169,7 @@ The score starts at 10 and loses points, so the brief's lunch scores 4:
 - 2 points off when three quarters or more of the calories come from refined flour (biscuits, crackers). The reason shown is "Mostly refined flour".
 - 1 point off for every nutrient the insights mark over or under target (calories, carbs, protein, fat, fibre), so the score never disagrees with the arrows.
 
-The first rule that applies is the reason shown with the score. The brief's lunch loses 2 + 4 points (calories, carbs over; protein, fibre under): 4. Task 1's lunch and task 3's lunch both score 5. Yesterday's plate with half the rice loses 2 points (carbs over, protein under): 8. A nutrient is "over" when it is above 105 % of its limit (calories, carbs, fat) and "under" when it is below 90 % of its goal (protein, fibre). Flow 2's ranges allow plus or minus 5 % for a food marked "Sure" (or checked by the person) and plus or minus 20 % for "Check this".
+The first rule that applies is the reason shown with the score. The brief's lunch loses 2 + 4 points (calories, carbs over; protein, fibre under): 4. Task 1's lunch and task 3's lunch both score 5. Task 5's plate (half the rice, aloo matar, a katori of curd) loses 3 points (calories, carbs and fat over): 7, with the reason "More calories than your lunch target". A nutrient is "over" when it is above 105 % of its limit (calories, carbs, fat) and "under" when it is below 90 % of its goal (protein, fibre). Flow 2's ranges allow plus or minus 5 % for a food marked "Sure" (or checked by the person) and plus or minus 20 % for "Check this".
 
 ## Changes after the comparability review
 
@@ -178,6 +188,16 @@ And three changes to Flow 3 only, to close gaps the review found:
 - "Klik" now appears in Flow 3, as a label on the Photo option, so the coach mark "Klik means logging by photo" explains a word that is on screen.
 - The "Estimate" tag no longer disappears after saving: each saved food keeps "Estimate" or "Your count", and the insights carry an "Estimate" tag while any amount is still estimated.
 - Flow 3 can now change a food's identity: "Not this food" under each found food opens its look-alikes, as Flow 1 and Flow 2 already could.
+
+## Changes after the second review (11 Nov)
+
+Made to all three flows at once; nothing else was changed:
+
+- **Task list:** no task is phrased as a question any more. Each task is described in detail (the day and time, what was in the photo, what was eaten and what the saved meal should show). Because the list is longer, it now scrolls inside the window on a laptop (panel 420 px wide instead of 340 px), so the phone stays whole and centred.
+- **Analysis wait:** 10 seconds in every flow (before: Flow 1 12 s, Flow 2 8 s, Flow 3 5 s). Flow 1's step 2 opens with "about 10 seconds left", as in the brief.
+- **Flow 3's nutrient bars** use the same action labels as Flows 1 and 2: "Eat less carbs", "Eat more protein", "Eat more fibre" (before: "Over target", "Under target").
+- **Task 5** now also asks the person to correct a food the app named wrongly (the vegetable was aloo matar, not aloo gobi) and to add a food that is not in the photo (a katori of curd). New correct answer: 100 g rice, 150 g dal, 120 g aloo matar and 1 katori of curd, 512 kcal.
+- **Screenshots:** the "Screens 1-9" boards and the previews show the brief's numbers (496 kcal, food score 4/10) instead of task 1's (396 kcal, 5/10). Task 1 and task 5 have their own "Task …" screenshots.
 
 ## Earlier designs
 

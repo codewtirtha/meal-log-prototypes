@@ -360,13 +360,13 @@ function bindEvents() {
 /* =====================================================================
    Phone chrome: status bar, task panel, scaling
    ===================================================================== */
-/* The same five tasks in every flow. */
+/* The same five tasks in every flow. Each one describes what to do; none is phrased as a question. */
 const TASKS = [
-  'Before lunch you took a picture of a tub of biscuits. You ate all the glucose biscuits but only 10 of the 14 cream crackers. Record this lunch in the app.',
-  'How did your lunch compare with your lunch target? Find one thing to do differently next time.',
-  'You now remember that you ate 12 cream crackers, not 10. Change your saved lunch.',
-  'Start logging another meal with a photo, then stop before anything is saved.',
-  'Yesterday’s lunch was one plate of rice, dal and aloo gobi that you cooked at home. You took a picture of it before eating, and you ate everything except half of the rice. Record yesterday’s lunch in the app.',
+  'It is 1:20 PM on 10 October and you have just finished lunch. Before you started eating, at 12:45 PM, you took a photo of your lunch from above: a clear tub of biscuits holding 14 cream crackers and 6 glucose biscuits. The photo is saved on your phone. You ate all 6 glucose biscuits but only 10 of the 14 cream crackers. Record this lunch in the app so that it shows only what you ate.',
+  'Look at how this lunch compared with your lunch target. Find out whether you ate more or fewer calories than your target, which nutrients were above their targets and which were below them, and one thing to do differently at your next lunch.',
+  'A few minutes later, you remember that you ate 12 cream crackers, not 10. The 6 glucose biscuits were right. Change the lunch you have already saved so that it shows 12 cream crackers and 6 glucose biscuits.',
+  'You start to log another meal with a photo, then change your mind. Begin logging a meal with a photo and stop partway through, so that nothing new is saved and the lunch you logged stays as it is.',
+  'Yesterday, 9 October, you cooked lunch at home and ate it from one steel plate of rice, dal and a vegetable. You took a photo of the plate at 1:10 PM, before eating, and it is saved on your phone. The vegetable was aloo matar, not aloo gobi. You ate everything on the plate except half of the rice, and you also had a katori of curd that isn’t in the photo. Record yesterday’s lunch in the app so that it shows exactly what you ate.',
 ];
 const DISCLAIMER = 'Nothing leaves this page and nothing is stored.';
 function statusBarHtml() {
