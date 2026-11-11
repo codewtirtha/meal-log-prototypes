@@ -20,7 +20,7 @@
   --blue-50: #E8F2FE;     /* blue tint: screen_1 "Daily Insights" pill, screen_2 water button */
   --blue-100: #D3E7FC;    /* progress track: screen_5 */
   --pink: #DA0A78;        /* text links: screen_6 "Search here", screen_7 "Go back" (darkened to pass AA) */
-  --gem: #F80A8C;         /* Fitgems: screen_8 gem */
+  --dot: #F80A8C;         /* new-message dot (Flow 1 inbox): screen_8 pink */
 
   /* text */
   --ink: #0F1720;         /* headings: screen_6 "Lunch", screen_7 "Meal Logged!" */
@@ -330,7 +330,7 @@ img { display: block; max-width: 100%; }
 .headbtn { position: relative; width: 44px; height: 44px; display: grid; place-items: center; border: 0; border-radius: 12px; background: rgba(255, 255, 255, .1); color: #fff; padding: 0; }
 .headbtn + .headbtn { margin-left: 6px; }
 .headbtn .ic { width: 24px; height: 24px; }
-.headbtn .dot { position: absolute; top: 8px; right: 8px; width: 10px; height: 10px; border-radius: 50%; background: var(--gem); box-shadow: 0 0 0 2px var(--navy); }
+.headbtn .dot { position: absolute; top: 8px; right: 8px; width: 10px; height: 10px; border-radius: 50%; background: var(--dot); box-shadow: 0 0 0 2px var(--navy); }
 .home-sec { padding: 20px 20px 4px; background: var(--card); }
 .essentials-h { margin: 0 0 14px; font-family: var(--font-head); font-weight: 500; font-size: 22px; color: var(--ink); }
 .tiles { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
@@ -410,12 +410,11 @@ img { display: block; max-width: 100%; }
 .camchip { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 16px; border-radius: 999px; border: 1.5px solid rgba(255, 255, 255, .55); background: rgba(8, 12, 18, .5); color: #fff; font-size: 16px; font-weight: 600; }
 .camchip .ic { width: 20px; height: 20px; }
 
-/* photo examples: one good, one or two bad */
+/* photo examples: one good, one bad (the same in every flow) */
 .ex { display: flex; align-items: center; gap: 12px; }
 .ex-img { position: relative; width: 72px; height: 72px; flex: none; border-radius: 14px; overflow: hidden; background: #2A2F36; }
 .ex-img img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 .ex-img.blur img { filter: blur(2.6px) brightness(.5); transform: scale(1.1); }
-.ex-img.cut img { width: 150%; height: 150%; left: 18%; top: -38%; transform: rotate(-14deg); }
 .ex-img.crowd img { object-position: center; }
 .ex-mark { position: absolute; right: 4px; bottom: 4px; width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; box-shadow: 0 0 0 2px #fff; }
 .ex-mark .ic { width: 15px; height: 15px; stroke-width: 3; color: #fff; }
@@ -467,8 +466,6 @@ img { display: block; max-width: 100%; }
 .loglist .nm b { display: block; font-weight: 600; color: var(--ink); }
 .loglist .nm span { display: block; margin-top: 2px; color: var(--muted); font-size: 16px; }
 .loglist .kc { flex: none; font-weight: 600; color: var(--text); }
-.gemline { display: inline-flex; align-items: center; gap: 8px; }
-.gemline .ic { width: 22px; height: 22px; }
 
 /* narrow phones (360 px class) */
 @media (max-width: 380px) {

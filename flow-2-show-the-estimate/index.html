@@ -84,12 +84,6 @@
 .f2-saved .scorebox { text-align: left; }
 
 /* insights */
-.f2-gems { position: relative; display: inline-flex; align-items: center; gap: 6px; min-height: 44px; margin-right: 8px; padding: 0 14px 0 10px; border: 0; border-radius: 999px; background: #fff; box-shadow: var(--shadow-1); font-size: 18px; font-weight: 700; color: var(--ink); }
-.f2-gems .ic { width: 22px; height: 22px; }
-.f2-tip { position: absolute; z-index: 20; right: 12px; top: calc(var(--sb) + 60px); width: 300px; display: flex; gap: 6px; align-items: flex-start; padding: 12px 6px 12px 14px; border-radius: 16px; background: var(--navy); color: #fff; font-size: 17px; line-height: 1.4; box-shadow: var(--shadow-2); }
-.f2-tip::before { content: ''; position: absolute; top: -8px; right: 40px; width: 16px; height: 16px; background: var(--navy); transform: rotate(45deg); border-radius: 3px; }
-.f2-tip .linkbtn { display: inline-flex; min-height: 44px; vertical-align: middle; color: #FF8CC6; font-size: 17px; }
-.f2-tip .iconbtn { color: #fff; margin-top: -10px; }
 .f2-verdict { padding: 16px; }
 .f2-vtop { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
 .f2-vhead { margin: 10px 0 4px; font-family: var(--font-head); font-weight: 600; font-size: 22px; line-height: 1.3; color: var(--ink); }
@@ -101,6 +95,8 @@
 .f2-assume li { align-items: flex-start; }
 .f2-scorepill { display: inline-flex; align-items: center; gap: 8px; margin-top: 8px; padding: 6px 14px; border-radius: 999px; background: var(--score-bg); font-size: 16px; color: var(--text); }
 .f2-scorepill b { font-size: 18px; color: var(--ink); }
+/* the centre tab and the Home button share one name, "Log a meal": tabs take their label's width plus an equal share of the rest, so the longer label fits beside "Programs" */
+.tabbar .tab { flex: 1 1 auto; padding: 0 2px; }
 </style>
 </head>
 <body>

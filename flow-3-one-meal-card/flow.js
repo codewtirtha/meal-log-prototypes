@@ -16,16 +16,17 @@
                         Talk as small links, close
    4 Camera .......... "We estimate each food's amount. Everything in the frame
                         is counted; keep only what you'll eat." + "Photo tips"
+                        (one good and one bad example, as in Flows 1 and 2)
    5 Card, analysing . photo, two "Finding foods..." placeholder rows, "Retake"
    6 Card, review .... large counts with steppers, "Estimate" tags, meal chip,
                         live nutrition summary, "Add food", "Save meal"
-   7 Card, saved ..... snackbar "Lunch saved. Undo", score 4/10 with its scale
-   8 Card ............ chip "+10 Fitgems for logging. What are Fitgems?"
-   9 Card, insights .. labelled lunch target, directional colours, suggestion
+   7 Card, saved ..... snackbar "Lunch saved. Undo (10)", score 4/10 with its scale
+   8 Card, insights .. labelled lunch target, the verdict as a suggestion
+   9 Card, insights .. nutrient bars with labelled targets, directional colours
+   (Fitgems were removed from all three flows.)
    ===================================================================== */
 
 const ANALYSIS_MS = 5000;
-const MINUTE = { home: 44, camera: 45, card: 45 };
 
 /* ---------- 1-2 Home ---------- */
 const screens = {};
@@ -82,7 +83,7 @@ function reviewRowHtml(it) {
   const fd = FOODS[it.food];
   const tag = it.added ? `<span class="tag mine">${icon('plus')}Added</span>` : it.touched ? `<span class="tag mine">${icon('check')}Your count</span>` : `<span class="tag est">${icon('approx')}Estimate</span>`;
   return `<div class="f3-row"><div class="f3-rtop stack"><span class="nm">${esc(fd.name)}, ${esc(qtyText(it))}</span></div>
-    <div class="f3-rctl">${stepperHtml(it, 'lg')}<span class="side">${tag}<b class="num">${kcalOf(it)} kcal</b><span>${it.qty ? esc(gramsText(it)) : 'Not counted'}</span></span></div></div>`;
+    <div class="f3-rctl">${stepperHtml(it, 'lg')}<span class="side">${tag}<b class="num">${kcalOf(it)} kcal</b><span>${it.qty ? (byWeight(it) ? '' : esc(gramsText(it))) : 'Not counted'}</span></span></div></div>`;
 }
 function savedRowHtml(it) {
   return `<div class="f3-row"><div class="f3-rtop"><span class="nm">${esc(foodName(it))}<small>${esc(amountLine(it))}</small></span><span class="num" style="font-weight:600;font-size:17px">${kcalOf(it)} kcal</span></div></div>`;
@@ -99,6 +100,7 @@ screens.card = () => {
   const st = S.cardState; const d = S.draft; const m = st === 'saved' ? savedMeal() : null;
   const left = st === 'saved' ? `<button class="iconbtn" data-act="done" aria-label="Back to Home">${icon('chevL')}</button>` : st === 'analysing' ? `<button class="iconbtn" data-act="stopCard" aria-label="Stop and go back">${icon('x')}</button>` : `<button class="iconbtn" data-act="discard" aria-label="${d && d.editing ? 'Stop changing this meal' : 'Stop logging'}">${icon('x')}</button>`;
   const title = st === 'analysing' ? 'New meal' : mealName((m || d).meal);
+  const pic = st === 'analysing' ? curPhoto() : { key: (m || d).photo, day: (m || d).day, time: (m || d).time };
   let inner = '';
   if (st === 'analysing') {
     inner = `<div class="f3-finding"><span class="spinner"></span>Finding foods…</div>
@@ -106,23 +108,22 @@ screens.card = () => {
       <div class="skel-row" aria-hidden="true"><span class="skel sq"></span><span style="flex:1;display:grid;gap:8px"><span class="skel" style="width:60%"></span><span class="skel" style="width:35%"></span></span></div>
       <div class="f3-retake"><button class="linkbtn" data-act="retake">${icon('retake')}Retake</button></div>`;
   } else if (st === 'review') {
-    inner = `<div class="f3-meta"><button class="chip meal" data-act="changeMeal">${icon('clock')}<b>${esc(mealName(d.meal))}</b>${icon('chevD')}</button><span class="when">${DAY_LABEL}, ${d.time}</span></div>
+    inner = `<div class="f3-meta"><button class="chip meal" data-act="changeMeal">${icon('clock')}<b>${esc(mealName(d.meal))}</b>${icon('chevD')}</button><span class="when">${esc(whenText(d))}</span></div>
       ${d.items.map(reviewRowHtml).join('')}
       <button class="f3-add" data-act="addFoodOpen">${icon('plus')}Add food</button>
       ${liveHtml(d.items, d.meal)}`;
   } else {
     const sc = foodScore(m.items, m.meal);
-    inner = `<div class="f3-meta"><span class="chip meal" style="cursor:default">${icon('clock')}<b>${esc(mealName(m.meal))}</b></span><span class="when">${DAY_LABEL}, ${m.time}</span></div>
+    inner = `<div class="f3-meta"><span class="chip meal" style="cursor:default">${icon('clock')}<b>${esc(mealName(m.meal))}</b></span><span class="when">${esc(whenText(m))}</span></div>
       ${m.items.map(savedRowHtml).join('')}
       <div class="f3-edit"><button class="linkbtn" data-act="editCard">${icon('pencil')}Edit foods</button></div>
-      <section class="f3-sec" id="score">${scoreHtml(sc)}
-        ${S.gemChip ? `<div class="f3-gemchip ${S.gemPop ? 'pop' : ''}" id="gems">${GEM}<span>+${FITGEMS} Fitgems for logging.</span><button class="linkbtn" data-act="fitgems">What are Fitgems?</button></div>` : ''}</section>
+      <section class="f3-sec" id="score">${scoreHtml(sc)}</section>
       ${insightsHtml(m)}`;
   }
   const foot = st === 'review' ? `<div class="footer"><button class="btn" data-act="save">${d.editing ? 'Save changes' : 'Save meal'}</button></div>` : st === 'saved' ? `<div class="footer"><button class="btn" data-act="done">Done</button></div>` : '';
   return `<section class="screen grey">
-    <header class="topbar">${left}<span class="title">${esc(title)}<small>${DAY_LABEL}, ${PHOTO_TIME}</small></span></header>
-    <div class="body f3-page"><article class="f3-card" aria-label="Meal card">${photoHtml('tub', 'photo', st === 'analysing' ? '<span class="scanline"></span>' : '', 'Your photo: a clear tub of biscuits')}${inner}</article></div>
+    <header class="topbar">${left}<span class="title">${esc(title)}<small>${esc(whenText(pic))}</small></span></header>
+    <div class="body f3-page"><article class="f3-card" aria-label="Meal card">${photoHtml(pic.key, 'photo', st === 'analysing' ? '<span class="scanline"></span>' : '', photoAlt(pic.key))}${inner}</article></div>
     ${foot}
   </section>`;
 };
@@ -145,28 +146,32 @@ function scrollToScore() {
   b.scrollTop = Math.max(0, el.getBoundingClientRect().top - b.getBoundingClientRect().top + b.scrollTop - 230);
   App.mem.card = b.scrollTop;
 }
-function snack(msg) { toast(msg, { label: 'Undo', fn: () => App.actions.undo(), ms: 8000 }); }
+/* the snackbar's Undo lasts 10 seconds, with the seconds left on the button, as in Flows 1 and 2 */
+function snack(msg) {
+  startUndoCountdown(() => hideToast());
+  toast(msg, { label: undoLabel(), labelHtml: true, fn: () => App.actions.undo(), ms: UNDO_SECONDS * 1000 });
+}
 
 const actions = A => {
   A.hideRebrand = () => { S.rebrandHidden = true; render(); };
   A.openLog = () => openSheet(methodSheet());
   A.coachOk = () => { S.coachSeen = true; render(); };
   A.takePhoto = () => { S.coachSeen = true; App.sheet = null; go('camera'); };
-  A.tips = () => openSheet(tipsSheet(['good', 'blurry', 'cut']));
+  A.tips = () => openSheet(tipsSheet(TIP_KEYS));
   A.openMeal = d => {
     const m = S.meals.find(x => x.id === d.id);
     if (!m || !m.draft) { toast('In this prototype, only the meal you log by photo can be edited.'); return; }
     S.savedId = m.id; S.draft = draftFromMeal(m); S.cardState = 'review'; go('card');
   };
   A.closeCamera = () => go('home', 'back');
-  A.shoot = () => startCard();
-  A.pickPhoto = () => startCard();
+  A.shoot = () => { useCamera(); startCard(); };
+  A.pickPhoto = d => { usePhoto(d.k || 'tub'); startCard(); };
   A.retake = () => { clearTimers(); go('camera', 'back'); toast('Photo not saved. Take another one.'); };
   A.stopCard = () => { clearTimers(); S.draft = null; go('home', 'back'); toast('Stopped. Nothing was saved.'); };
   A.finishAnalysis = () => { clearTimers(); S.draft = newDraft(); S.draft.items.forEach(i => { i.conf = 'est'; }); S.cardState = 'review'; render(); };
   A.qty = d => {
     const before = totals(S.draft.items); const it = draftItem(d.id);
-    it.qty = clamp(it.qty + Number(d.d), 0, 99); it.touched = true;
+    stepQty(it, d.d); it.touched = true;
     render(); bumpValue(d.id); flashChanged(before);
   };
   A.discard = () => openSheet(discardSheet(S.draft && S.draft.editing));
@@ -176,25 +181,22 @@ const actions = A => {
   };
   A.save = () => {
     if (!counted(S.draft.items).length) { toast('Every amount is 0, so there is nothing to save.'); return; }
-    const wasEdit = S.draft.editing; saveDraft(); S.cardState = 'saved'; S.minute = 46; render();
+    const wasEdit = S.draft.editing; saveDraft(); S.cardState = 'saved'; render();
     scrollToScore();
     snack(wasEdit ? `Changes to ${mealLower(S.draft.meal)} saved.` : `${mealName(S.draft.meal)} saved.`);
-    /* Fitgems are earned once, for the first save; the chip appears under the score a moment later */
-    if (!S.gemsGiven) { S.gemsGiven = true; later(() => { S.gemChip = true; S.gemPop = true; if (S.screen === 'card') render(); S.gemPop = false; }, 2500); }
   };
   A.undo = () => {
-    if (!S.undo) return; const wasEdit = S.draft && S.draft.editing; undoSave(); S.cardState = 'review'; render();
+    if (!S.undo) return; stopUndoCountdown(); const wasEdit = S.draft && S.draft.editing; undoSave(); S.cardState = 'review'; render();
     toast(wasEdit ? 'Undone. Your saved meal is back as it was.' : `Undone. Your ${mealLower(S.draft.meal)} is not saved yet.`);
   };
-  A.editCard = () => { hideToast(); S.undo = null; S.draft = draftFromMeal(savedMeal()); S.cardState = 'review'; render(); };
-  A.done = () => { hideToast(); S.undo = null; go('home', 'back'); };
+  A.editCard = () => { hideToast(); stopUndoCountdown(); S.undo = null; S.draft = draftFromMeal(savedMeal()); S.cardState = 'review'; render(); };
+  A.done = () => { hideToast(); stopUndoCountdown(); S.undo = null; go('home', 'back'); };
 };
 
 boot({
   title: 'Meal log — Flow 3',
   galleryTitle: 'Your recent photos',
-  state: () => ({ cardState: 'analysing', coachSeen: false, rebrandHidden: false, gemsGiven: false, gemChip: false, gemPop: false, minute: 44 }),
-  clock: st => { const want = st.screen === 'card' && st.cardState === 'saved' ? 46 : (MINUTE[st.screen] || 45); st.minute = Math.max(st.minute || 44, want); return `12:${st.minute}`; },
+  state: () => ({ cardState: 'analysing', coachSeen: false, rebrandHidden: false }),
   screens,
   actions,
 });

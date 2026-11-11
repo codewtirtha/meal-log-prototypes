@@ -13,6 +13,8 @@ Usage:
 
 OUT_DIR defaults to ~/Downloads/meal-log-prototype-screenshots. One folder per
 flow is written inside it, plus a board image with screens 1-9 left to right.
+Files named "Task 5 ..." show the mixed-plate task (yesterday's rice, dal and
+aloo gobi), which is the same in every flow.
 With --previews, each flow folder's preview.jpg (the 3 x 3 grid shown in its
 README) is refreshed too.
 """
@@ -45,6 +47,10 @@ CHROME_PATHS = [
 SCROLL_TO = "(() => {{ const b = document.querySelector('#screen .body'); const el = document.querySelector('{sel}'); b.scrollTop = Math.max(0, el.getBoundingClientRect().top - b.getBoundingClientRect().top + b.scrollTop - {off}); }})()"
 SCROLL_END = "(() => { const b = document.querySelector('#screen .body'); b.scrollTop = b.scrollHeight; })()"
 
+CHANGE_FIRST = "for (let i = 0; i < {n}; i++) PROTO.act('qty', {{id: PROTO.S.draft.items[0].id, d: {d}}})"
+# Task 5 (yesterday's plate of rice, dal and aloo gobi) starts from Home in every flow
+PLATE = "PROTO.act('pickPhoto', {k: 'thali'})"
+
 FLOWS = {
     1: {
         "folder": "flow-1-ask-before-saving",
@@ -54,18 +60,24 @@ FLOWS = {
             ("Screen 2 - Home scrolled to the Meal card", SCROLL_TO.format(sel="#mealCard", off=150), 2),
             ("Screen 3 - How do you want to log", "PROTO.act('openLog')", 3),
             ("Screen 4 - Camera", "PROTO.act('method', {m: 'photo'})", 4),
-            ("Screen 5 - Analysing, step 2 of 3", "PROTO.act('shoot'); PROTO.S.an.el = 2; PROTO.render()", 5),
+            ("Screen 4b - Your photos", "PROTO.act('gallery')", None),
+            ("Screen 5 - Analysing, step 2 of 3", "PROTO.act('pickPhoto', {k: 'tub'}); PROTO.S.an.el = 2; PROTO.render()", 5),
             ("Screen 6a - Question 1 of 2, cream crackers", "PROTO.act('finishAnalysis')", 6),
             ("Screen 6b - Not this food", "PROTO.act('notThis', {id: PROTO.S.draft.items[0].id})", None),
-            ("Screen 6c - Question 1 of 2, changed to 10", "PROTO.closeSheet(); for (let i = 0; i < 4; i++) PROTO.act('qty', {id: PROTO.S.draft.items[0].id, d: -1})", None),
-            ("Screen 6d - Question 2 of 2, glucose biscuits", "for (let i = 0; i < 4; i++) PROTO.act('qty', {id: PROTO.S.draft.items[0].id, d: 1}); PROTO.act('answer')", None),
-            ("Screen 7 - Saved, with Undo", "PROTO.act('answer')", 7),
-            ("Screen 8 - Insights with the Fitgems toast", "PROTO.act('seeInsights')", 8),
-            ("Screen 9a - Insights", "PROTO.hideToast(); " + SCROLL_TO.format(sel=".f1-basis", off=12), 9),
-            ("Screen 9b - Insights, nutrients", SCROLL_TO.format(sel=".f1-nutr", off=16), None),
-            ("Screen 9c - Insights, end", SCROLL_END, None),
-            ("Extra - What are Fitgems", "PROTO.act('fitgems')", None),
-            ("Extra - Home after logging", "PROTO.closeSheet(); PROTO.act('insBack'); " + SCROLL_TO.format(sel="#mealCard", off=150), None),
+            ("Screen 6c - Question 1 of 2, changed to 10", "PROTO.closeSheet(); " + CHANGE_FIRST.format(n=4, d=-1), None),
+            ("Screen 6d - Question 2 of 2, glucose biscuits", "PROTO.act('answer')", None),
+            ("Screen 7 - Saved, with a 10-second Undo", "PROTO.act('answer')", 7),
+            ("Screen 8 - Insights, score and calories", "PROTO.act('seeInsights')", 8),
+            ("Screen 9 - Insights, nutrients", SCROLL_TO.format(sel=".f1-nutr", off=16), 9),
+            ("Screen 9b - Insights, end", SCROLL_END, None),
+            ("Extra - Home after logging", "PROTO.act('insBack'); " + SCROLL_TO.format(sel="#mealCard", off=150), None),
+            ("Task 5a - Analysing yesterday's plate", "PROTO.act('openLog'); PROTO.act('method', {m: 'photo'}); " + PLATE + "; PROTO.S.an.el = 2; PROTO.render()", None),
+            ("Task 5b - Question 1 of 3, rice", "PROTO.act('finishAnalysis')", None),
+            ("Task 5c - Question 1 of 3, changed to 100 g", CHANGE_FIRST.format(n=4, d=-1), None),
+            ("Task 5d - Question 3 of 3, aloo gobi", "PROTO.act('answer'); PROTO.act('answer')", None),
+            ("Task 5e - Saved", "PROTO.act('answer')", None),
+            ("Task 5f - Insights", "PROTO.act('seeInsights')", None),
+            ("Task 5g - Insights, nutrients", SCROLL_TO.format(sel=".f1-nutr", off=16), None),
         ],
     },
     2: {
@@ -77,15 +89,22 @@ FLOWS = {
             ("Screen 3 - Log a meal sheet", "PROTO.act('openLog')", 3),
             ("Screen 4 - Camera with outlines", "PROTO.act('method', {m: 'photo'})", 4),
             ("Screen 4b - Photo tips", "PROTO.act('tips')", None),
-            ("Screen 5 - Analysing, foods appearing", "PROTO.closeSheet(); PROTO.act('shoot'); PROTO.S.an.el = 4.2; PROTO.render()", 5),
+            ("Screen 4c - Your photos", "PROTO.act('gallery')", None),
+            ("Screen 5 - Analysing, foods appearing", "PROTO.act('pickPhoto', {k: 'tub'}); PROTO.S.an.el = 4.2; PROTO.render()", 5),
             ("Screen 6a - Review", "PROTO.act('finishAnalysis')", 6),
             ("Screen 6b - Review, foods", SCROLL_TO.format(sel="#rows", off=12), None),
-            ("Screen 7 - Meal saved", "PROTO.act('save')", 7),
-            ("Screen 8 - Insights with the +10 Fitgems counter", "PROTO.act('seeInsights')", 8),
-            ("Screen 9a - Insights, estimate", "PROTO.act('tipClose'); " + SCROLL_TO.format(sel="#verdict", off=12), 9),
-            ("Screen 9b - Insights, nutrients", SCROLL_TO.format(sel="#nutr", off=12), None),
-            ("Extra - What are Fitgems", "PROTO.act('fitgems')", None),
-            ("Extra - Home after logging", "PROTO.closeSheet(); PROTO.act('insBack'); " + SCROLL_TO.format(sel="#mealCard", off=150), None),
+            ("Screen 6c - Review, crackers changed to 10", CHANGE_FIRST.format(n=4, d=-1), None),
+            ("Screen 7 - Meal saved, with a 10-second Undo", "PROTO.act('save')", 7),
+            ("Screen 8 - Insights, estimate", "PROTO.act('seeInsights')", 8),
+            ("Screen 9 - Insights, nutrients", SCROLL_TO.format(sel="#nutr", off=12), 9),
+            ("Screen 9b - Insights, what we assumed", SCROLL_END, None),
+            ("Extra - Home after logging", "PROTO.act('insBack'); " + SCROLL_TO.format(sel="#mealCard", off=150), None),
+            ("Task 5a - Analysing yesterday's plate", "PROTO.act('openLog'); PROTO.act('method', {m: 'photo'}); " + PLATE + "; PROTO.S.an.el = 6; PROTO.render()", None),
+            ("Task 5b - Review", "PROTO.act('finishAnalysis')", None),
+            ("Task 5c - Review, rice changed to 100 g", CHANGE_FIRST.format(n=4, d=-1) + "; " + SCROLL_TO.format(sel="#rows", off=12), None),
+            ("Task 5d - Saved", "PROTO.act('save')", None),
+            ("Task 5e - Insights", "PROTO.act('seeInsights')", None),
+            ("Task 5f - Insights, nutrients", SCROLL_TO.format(sel="#nutr", off=12), None),
         ],
     },
     3: {
@@ -98,15 +117,19 @@ FLOWS = {
             ("Screen 3 - Log meal sheet with coach mark", SCROLL_TO.format(sel="#mealCard", off=150) + "; PROTO.act('openLog')", 3),
             ("Screen 4 - Camera", "PROTO.act('takePhoto')", 4),
             ("Screen 4b - Photo tips", "PROTO.act('tips')", None),
-            ("Screen 5 - Meal card, analysing", "PROTO.closeSheet(); PROTO.act('shoot')", 5),
+            ("Screen 4c - Your recent photos", "PROTO.act('gallery')", None),
+            ("Screen 5 - Meal card, analysing", "PROTO.act('pickPhoto', {k: 'tub'})", 5),
             ("Screen 6a - Meal card, review", "PROTO.act('finishAnalysis')", 6),
-            ("Screen 6b - Meal card, review with live summary", SCROLL_TO.format(sel="#live", off=200), None),
-            ("Screen 7 - Meal card, saved", "PROTO.act('save')", 7),
-            ("Screen 8 - Meal card, Fitgems chip", "PROTO.hideToast(); PROTO.S.gemChip = true; PROTO.render(); " + SCROLL_TO.format(sel="#score", off=170), 8),
-            ("Screen 9 - Meal card, insights", SCROLL_TO.format(sel="#insights", off=0), 9),
-            ("Screen 9b - Meal card, insights end", SCROLL_END, None),
-            ("Extra - What are Fitgems", "PROTO.act('fitgems')", None),
-            ("Extra - Home after logging", "PROTO.closeSheet(); PROTO.act('done'); " + SCROLL_TO.format(sel="#mealCard", off=150), None),
+            ("Screen 6b - Meal card, crackers changed to 10, live summary", CHANGE_FIRST.format(n=4, d=-1) + "; " + SCROLL_TO.format(sel="#live", off=200), None),
+            ("Screen 7 - Meal card, saved, with a 10-second Undo", "PROTO.act('save')", 7),
+            ("Screen 8 - Meal card, insights and suggestion", "PROTO.hideToast(); " + SCROLL_TO.format(sel="#insights", off=0), 8),
+            ("Screen 9 - Meal card, nutrients", SCROLL_END, 9),
+            ("Extra - Home after logging", "PROTO.act('done'); " + SCROLL_TO.format(sel="#mealCard", off=150), None),
+            ("Task 5a - Meal card, analysing yesterday's plate", "PROTO.act('openLog'); PROTO.act('takePhoto'); " + PLATE, None),
+            ("Task 5b - Meal card, review", "PROTO.act('finishAnalysis')", None),
+            ("Task 5c - Meal card, rice changed to 100 g", CHANGE_FIRST.format(n=4, d=-1) + "; " + SCROLL_TO.format(sel="#live", off=420), None),
+            ("Task 5d - Meal card, saved", "PROTO.act('save')", None),
+            ("Task 5e - Meal card, insights", "PROTO.hideToast(); " + SCROLL_TO.format(sel="#insights", off=0), None),
         ],
     },
 }
@@ -137,10 +160,11 @@ class Chrome:
         prefix = []
         if sys.platform == "darwin" and rosetta():
             prefix = ["arch", "-arm64"]  # a Python under Rosetta would otherwise start Chrome as x64 (slow)
+        extra = ["--no-sandbox"] if hasattr(os, "geteuid") and os.geteuid() == 0 else []  # Chrome refuses to run as root otherwise (Linux containers)
         self.proc = subprocess.Popen(
             prefix + [exe, "--headless=new", f"--remote-debugging-port={self.port}", "--remote-allow-origins=*",
              f"--user-data-dir={self.profile}", "--no-first-run", "--no-default-browser-check",
-             "--hide-scrollbars", "--force-color-profile=srgb", "about:blank"],
+             "--hide-scrollbars", "--force-color-profile=srgb"] + extra + ["about:blank"],
             stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         tabs = None
         for _ in range(600):

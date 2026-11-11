@@ -3,7 +3,8 @@
    PB Health meal-log prototypes: shared core for all three flows.
    Static only: no network calls, no storage, no database.
 
-   - scenario data: Asha's lunch, a tub of mixed biscuits, 10 Oct, 12:45 PM
+   - scenario data: Asha's lunch, a tub of mixed biscuits, 10 Oct, 12:45 PM;
+     yesterday's lunch, a plate of rice, dal and aloo gobi, 9 Oct, 1:10 PM
    - nutrition maths, the food score, estimate ranges, suggestions
    - icons and small illustrations
    - a tiny state-to-HTML renderer with event delegation
@@ -33,6 +34,10 @@ const ART = {
   round: IMG + 'crop-glucose-biscuit.jpg',  /* close-up from that photo */
   plate: IMG + 'example-plate.svg',         /* a single plate: the "good photo" example */
   chai: IMG + 'breakfast-chai.svg',         /* this morning's breakfast photo */
+  thali: IMG + 'lunch-plate.svg',           /* yesterday's lunch: rice, dal and aloo gobi on one plate */
+  cropRice: IMG + 'crop-rice.jpg',          /* close-ups from that photo */
+  cropDal: IMG + 'crop-dal.jpg',
+  cropSabzi: IMG + 'crop-sabzi.jpg',
 };
 
 /* =====================================================================
@@ -40,7 +45,11 @@ const ART = {
    ===================================================================== */
 const USER = { name: 'Asha', initial: 'A' };
 const DAY_LABEL = '10 Oct';
+const YESTERDAY_LABEL = '9 Oct';
+/* Asha logs after eating: the photo was taken at 12:45 PM, before lunch, and it is now 1:20 PM. */
 const PHOTO_TIME = '12:45 PM';
+const NOW_TIME = '1:20 PM';
+const NOW_CLOCK = '1:20';
 const MEALS = [
   { key: 'breakfast', name: 'Breakfast', range: 'Until 10 AM' },
   { key: 'msnack', name: 'Morning snack', range: '10 AM to 12 PM' },
@@ -61,7 +70,10 @@ const TARGETS = {
 
 /* Values per piece or per portion. The two detected foods are set so that 14 cream crackers
    (84 g, 350 kcal) and 6 glucose biscuits (36 g, 146 kcal) give exactly the brief's totals:
-   496 kcal, carbs 86 g, protein 7 g, fat 14 g, fibre 2 g. */
+   496 kcal, carbs 86 g, protein 7 g, fat 14 g, fibre 2 g.
+   Foods marked byWeight (the plate's rice, dal and sabzi) are counted in grams: their values
+   are per gram and their steppers move 25 g at a time. */
+const weighed = (name, per100, extra = {}) => Object.assign({ name, unit: 'g', units: 'g', g: 1, byWeight: true, step: 25, kcal: per100[0] / 100, carbs: per100[1] / 100, protein: per100[2] / 100, fat: per100[3] / 100, fibre: per100[4] / 100 }, extra);
 const FOODS = {
   cream_cracker: { name: 'Cream crackers', unit: 'piece', units: 'pieces', g: 6, kcal: 25, carbs: 60 / 14, protein: 5 / 14, fat: 10 / 14, fibre: 1.5 / 14, refined: true, short: 'crackers', crop: 'cracker' },
   glucose_biscuit: { name: 'Glucose biscuits', unit: 'piece', units: 'pieces', g: 6, kcal: 146 / 6, carbs: 26 / 6, protein: 2 / 6, fat: 4 / 6, fibre: 0.5 / 6, refined: true, short: 'biscuits', crop: 'round' },
@@ -74,30 +86,67 @@ const FOODS = {
   egg: { name: 'Boiled egg', unit: 'egg', units: 'eggs', g: 50, kcal: 78, carbs: 0.6, protein: 6.3, fat: 5.3, fibre: 0 },
   dal: { name: 'Dal', unit: 'katori', units: 'katoris', g: 150, kcal: 160, carbs: 20, protein: 8, fat: 5, fibre: 5 },
   banana: { name: 'Banana', unit: 'banana', units: 'bananas', g: 120, kcal: 105, carbs: 27, protein: 1.3, fat: 0.4, fibre: 3.1 },
+  /* yesterday's plate, per 100 g cooked: kcal, carbs, protein, fat, fibre */
+  rice: weighed('Rice', [130, 28, 2.7, 0.3, 0.4], { short: 'rice', crop: 'cropRice' }),
+  jeera_rice: weighed('Jeera rice', [155, 27, 3, 4, 0.6], { short: 'rice', crop: 'cropRice' }),
+  brown_rice: weighed('Brown rice', [112, 23, 2.6, 0.9, 1.8], { short: 'rice', crop: 'cropRice' }),
+  toor_dal: weighed('Dal', [160 / 1.5, 20 / 1.5, 8 / 1.5, 5 / 1.5, 5 / 1.5], { short: 'dal', crop: 'cropDal' }),
+  moong_dal: weighed('Moong dal', [95, 12, 6, 2.5, 3], { short: 'dal', crop: 'cropDal' }),
+  masoor_dal: weighed('Masoor dal', [100, 13, 6.5, 2.5, 3.5], { short: 'dal', crop: 'cropDal' }),
+  aloo_gobi: weighed('Aloo gobi', [100, 11, 2.5, 5.5, 3], { short: 'aloo gobi', crop: 'cropSabzi' }),
+  aloo_matar: weighed('Aloo matar', [110, 14, 3.5, 5, 3.5], { short: 'aloo matar', crop: 'cropSabzi' }),
+  mixed_veg: weighed('Mixed vegetable sabzi', [90, 9, 2.5, 5, 3], { short: 'sabzi', crop: 'cropSabzi' }),
 };
 const ADDABLE = ['tea', 'curd', 'egg', 'dal', 'banana'];
-/* What the photo analysis "finds" (Wizard of Oz): the brief's two foods. */
-const DETECTED = [
-  { food: 'cream_cracker', qty: 14, conf: 'sure', alts: ['salted_cracker', 'jeera_cracker'] },
-  { food: 'glucose_biscuit', qty: 6, conf: 'check', alts: ['marie', 'digestive'] },
-];
-/* This morning's meal, already logged, so the Meal card has something to list. */
-const BREAKFAST = { id: 'm-breakfast', meal: 'breakfast', time: '8:30 AM', photo: 'chai', items: [{ id: 'b1', food: 'tea', qty: 1, conf: 'mine' }, { id: 'b2', food: 'marie', qty: 2, conf: 'mine' }] };
-const FITGEMS = 10;
 
-function detectedItems() {
-  return DETECTED.map((d, i) => ({ id: uid(), n: i + 1, food: d.food, qty: d.qty, det: d.qty, detFood: d.food, conf: d.conf, alts: d.alts.slice(), touched: false }));
+/* The photos Asha can log (Wizard of Oz: the analysis always "finds" these foods).
+   tub: the brief's photo, taken today at 12:45 PM before lunch; the camera also sees this tub.
+   thali: yesterday's home-cooked lunch on one plate, for the mixed-plate task.
+   ol: which outline Flow 2 draws on the photo for that food. */
+const PHOTOS = {
+  tub: {
+    day: DAY_LABEL, time: PHOTO_TIME, label: 'Today, 12:45 PM', meal: 'lunch', alt: 'a clear tub of biscuits',
+    detect: [
+      { food: 'cream_cracker', qty: 14, conf: 'sure', alts: ['salted_cracker', 'jeera_cracker'], ol: 'cracker' },
+      { food: 'glucose_biscuit', qty: 6, conf: 'check', alts: ['marie', 'digestive'], ol: 'round' },
+    ],
+  },
+  thali: {
+    day: YESTERDAY_LABEL, time: '1:10 PM', label: 'Yesterday, 1:10 PM', meal: 'lunch', alt: 'a plate of rice, dal and aloo gobi',
+    detect: [
+      { food: 'rice', qty: 200, conf: 'sure', alts: ['jeera_rice', 'brown_rice'], ol: 'rice' },
+      { food: 'toor_dal', qty: 150, conf: 'sure', alts: ['moong_dal', 'masoor_dal'], ol: 'dal' },
+      { food: 'aloo_gobi', qty: 120, conf: 'check', alts: ['aloo_matar', 'mixed_veg'], ol: 'sabzi' },
+    ],
+  },
+};
+/* This morning's meal, already logged, so the Meal card has something to list. */
+const BREAKFAST = { id: 'm-breakfast', meal: 'breakfast', day: DAY_LABEL, time: '8:30 AM', photo: 'chai', items: [{ id: 'b1', food: 'tea', qty: 1, conf: 'mine' }, { id: 'b2', food: 'marie', qty: 2, conf: 'mine' }] };
+
+/* the photo being logged: one from "Your photos" keeps its own day and time; a new photo
+   from the camera (always the biscuit tub) is taken now */
+function usePhoto(key) { const p = PHOTOS[key]; S.photo = { key, day: p.day, time: p.time }; }
+function useCamera() { S.photo = { key: 'tub', day: DAY_LABEL, time: NOW_TIME }; }
+const curPhoto = () => S.photo || { key: 'tub', day: DAY_LABEL, time: PHOTO_TIME };
+const photoAlt = key => `Your photo: ${(PHOTOS[key] || PHOTOS.tub).alt}`;
+const whenText = m => `${m.day || DAY_LABEL}, ${m.time}`;
+function detectedItems(key = 'tub') {
+  return PHOTOS[key].detect.map((d, i) => ({ id: uid(), n: i + 1, food: d.food, qty: d.qty, det: d.qty, detFood: d.food, conf: d.conf, alts: d.alts.slice(), ol: d.ol, touched: false }));
 }
 
 /* ---------- amounts: always pieces or grams, never "Number" ---------- */
+const byWeight = it => !!FOODS[it.food].byWeight;
 const unitWord = (fd, q) => (q === 1 ? fd.unit : fd.units);
 const qtyText = it => `${it.qty} ${unitWord(FOODS[it.food], it.qty)}`;
 const gramsOf = it => r0(FOODS[it.food].g * it.qty);
-function gramsText(it, approx = 'about ') { const fd = FOODS[it.food]; return `${fd.unit === 'piece' ? approx : ''}${gramsOf(it)} ${fd.gu || 'g'}`; }
+function gramsText(it, approx = 'about ') { const fd = FOODS[it.food]; return `${fd.unit === 'piece' || fd.byWeight ? approx : ''}${gramsOf(it)} ${fd.gu || 'g'}`; }
 const kcalOf = it => r0(FOODS[it.food].kcal * it.qty);
 const foodName = it => FOODS[it.food].name;
 const lowerName = it => { const n = foodName(it); return n.startsWith('Marie') ? n : n.toLowerCase(); };
-function amountLine(it, approx = 'about ') { return `${qtyText(it)} (${gramsText(it, approx)})`; }
+/* "14 pieces (about 84 g)" for pieces; "about 200 g" for food weighed in grams */
+function amountLine(it, approx = 'about ') { return byWeight(it) ? gramsText(it, approx) : `${qtyText(it)} (${gramsText(it, approx)})`; }
+/* one stepper tap: a piece, or 25 g */
+function stepQty(it, d) { const fd = FOODS[it.food]; it.qty = clamp(it.qty + Number(d) * (fd.step || 1), 0, fd.byWeight ? 2000 : 99); }
 
 /* =====================================================================
    Nutrition maths
@@ -129,18 +178,17 @@ function nutrientRows(items, mealKey) {
 }
 const rowsByKey = rows => Object.fromEntries(rows.map(r => [r.key, r]));
 
-/* Food score out of 10 (the brief's 4 for this lunch). Rules, in order of weight:
-   3 points off when 75 % or more of the calories come from refined flour (biscuits, crackers),
-   1 off for calories more than 10 % over the meal target, 1 off for protein under half its goal,
-   1 off for fibre under half its goal. The first rule that applies is the reason shown. */
+/* Food score out of 10 (the brief's 4 for the biscuit lunch). It starts at 10:
+   2 points off when 75 % or more of the calories come from refined flour (biscuits, crackers),
+   then 1 off for every nutrient the insights mark over or under target, so the score never
+   disagrees with the arrows. The first rule that applies is the reason shown. */
 function foodScore(items, mealKey) {
-  const t = totals(items); const T = TARGETS[mealKey];
+  const t = totals(items); const R = rowsByKey(nutrientRows(items, mealKey));
   const refined = counted(items).filter(i => FOODS[i.food].refined).reduce((a, i) => a + FOODS[i.food].kcal * i.qty, 0);
   const pens = [];
-  if (t.kcal > 0 && refined / t.kcal >= 0.75) pens.push({ pts: 3, why: 'Mostly refined flour' });
-  if (t.kcal > T.kcal * 1.1) pens.push({ pts: 1, why: `More calories than your ${mealLower(mealKey)} target` });
-  if (t.protein < T.protein * 0.5) pens.push({ pts: 1, why: 'Low in protein' });
-  if (t.fibre < T.fibre * 0.5) pens.push({ pts: 1, why: 'Low in fibre' });
+  if (t.kcal > 0 && refined / t.kcal >= 0.75) pens.push({ pts: 2, why: 'Mostly refined flour' });
+  const why = { kcal: `More calories than your ${mealLower(mealKey)} target`, carbs: 'High in carbs', protein: 'Low in protein', fat: 'High in fat', fibre: 'Low in fibre' };
+  NKEYS.forEach(k => { if (R[k].status !== 'within') pens.push({ pts: 1, why: why[k] }); });
   const score = clamp(10 - pens.reduce((a, p) => a + p.pts, 0), 1, 10);
   return { score, reason: pens.length ? pens[0].why : 'Close to your targets', pens };
 }
@@ -166,7 +214,7 @@ function suggestion(items, mealKey) {
   const R = rowsByKey(nutrientRows(items, mealKey)); const parts = [];
   if (R.carbs.status === 'over' || R.kcal.status === 'over') {
     const top = counted(items).map(i => ({ i, v: FOODS[i.food].carbs * i.qty })).sort((a, b) => b.v - a.v)[0];
-    if (top) parts.push(`try fewer ${FOODS[top.i.food].short || foodName(top.i).toLowerCase()}`);
+    if (top) parts.push(`try ${byWeight(top.i) ? 'less' : 'fewer'} ${FOODS[top.i.food].short || foodName(top.i).toLowerCase()}`);
   }
   if (R.protein.status === 'under') parts.push('add some protein');
   else if (R.fibre.status === 'under') parts.push('add a vegetable or a fruit');
@@ -214,8 +262,6 @@ const ICONS = {
   approx: '<path d="M4 9.5c2.5-2.2 5.5-2.2 8 0s5.5 2.2 8 0"/><path d="M4 15.5c2.5-2.2 5.5-2.2 8 0s5.5 2.2 8 0"/>',
 };
 function icon(n, cls = '') { return `<svg class="ic ${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">${ICONS[n] || ''}</svg>`; }
-/* the Fitgems gem (screen_8) */
-const GEM = '<svg class="ic gem" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21.5 2.5 9.8 6 3.5h12l3.5 6.3z" style="fill:var(--gem)"/><path d="M2.5 9.8h19M9 3.5l3 6.3 3-6.3M12 21.5 9 9.8m3 11.7 3-11.7" stroke="#fff" stroke-opacity=".6" stroke-width="1" fill="none"/></svg>';
 /* duotone tile icons, as on screen_1 */
 const DUO = {
   assessment: '<svg viewBox="0 0 32 32" aria-hidden="true"><rect x="6" y="5" width="20" height="24" rx="4" style="fill:var(--duo-1)"/><rect x="11" y="2.5" width="10" height="5.5" rx="2" style="fill:var(--duo-2)"/><path d="M10.5 14.5l2 2 3-3M10.5 21.5l2 2 3-3" stroke="#fff" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M18.5 15.5h3.5M18.5 22.5h3.5" style="stroke:var(--duo-2)" stroke-width="2.2" stroke-linecap="round"/></svg>',
@@ -258,7 +304,7 @@ function render() {
   const light = !!(scr && (scr.classList.contains('dark') || scr.dataset.status === 'light'));
   const sbEl = $('.statusbar'); if (sbEl) sbEl.classList.toggle('light', light);
   const hb = $('.homebar'); if (hb) hb.classList.toggle('light', !!(scr && scr.classList.contains('dark')) && !App.sheet);
-  const t = $('#sbTime'); if (t) t.textContent = App.cfg.clock ? App.cfg.clock(S) : '12:45';
+  const t = $('#sbTime'); if (t) t.textContent = NOW_CLOCK;
   const isNewSheet = App.sheet && App.sheet !== App.lastSheet;
   $('#overlay').innerHTML = App.sheet ? `<div class="scrim${isNewSheet && !SHOTS ? ' anim' : ''}" data-act="closeSheet"></div><div class="sheet${isNewSheet && !SHOTS ? ' anim' : ''}" role="dialog" aria-modal="true">${App.sheet()}</div>` : '';
   if (App.sheet && !isNewSheet) { const nsb = $('#overlay .sheet-body'); if (nsb) nsb.scrollTop = sheetScroll; }
@@ -276,12 +322,29 @@ function clearTimers() { timers.forEach(t => { clearTimeout(t); clearInterval(t)
 let toastTimer = null;
 function toast(msg, opts = {}) {
   const host = $('#toast');
-  host.innerHTML = `<div class="toast ${opts.cls || ''}" role="status"><span class="msg">${opts.html ? msg : esc(msg)}</span>${opts.label ? `<button type="button" class="tbtn" id="toastAct">${esc(opts.label)}</button>` : ''}${opts.close ? `<button type="button" class="iconbtn tclose" id="toastClose" aria-label="Close">${icon('x')}</button>` : ''}</div>`;
+  host.innerHTML = `<div class="toast ${opts.cls || ''}" role="status"><span class="msg">${opts.html ? msg : esc(msg)}</span>${opts.label ? `<button type="button" class="tbtn" id="toastAct">${opts.labelHtml ? opts.label : esc(opts.label)}</button>` : ''}${opts.close ? `<button type="button" class="iconbtn tclose" id="toastClose" aria-label="Close">${icon('x')}</button>` : ''}</div>`;
   const b = $('#toastAct'); if (b) b.onclick = () => { hideToast(); if (opts.fn) opts.fn(); };
   const c = $('#toastClose'); if (c) c.onclick = () => hideToast();
   clearTimeout(toastTimer); if (!SHOTS) toastTimer = setTimeout(hideToast, opts.ms || 5000);
 }
 function hideToast() { const t = $('#toast'); if (t) t.innerHTML = ''; }
+
+/* Undo after saving lasts 10 seconds in every flow, with the seconds left shown on the button
+   ("Undo (10)"). Each flow shows the button its own way; elements marked data-undo-n are
+   updated every second, and onEnd runs when time is up. */
+const UNDO_SECONDS = 10;
+let undoTick = null;
+function startUndoCountdown(onEnd) {
+  stopUndoCountdown(); S.undoLeft = UNDO_SECONDS;
+  if (SHOTS) return;
+  undoTick = setInterval(() => {
+    S.undoLeft -= 1;
+    $$('[data-undo-n]').forEach(e => { e.textContent = `(${S.undoLeft})`; });
+    if (S.undoLeft <= 0) { stopUndoCountdown(); S.undo = null; if (onEnd) onEnd(); }
+  }, 1000);
+}
+function stopUndoCountdown() { clearInterval(undoTick); undoTick = null; S.undoLeft = 0; }
+const undoLabel = () => `Undo <b data-undo-n>(${S.undoLeft})</b>`;
 function notInPrototype(what) { toast(`${what ? what + ' is' : 'That is'} not part of this prototype. Try logging your lunch with a photo.`); }
 
 function bindEvents() {
@@ -299,15 +362,15 @@ function bindEvents() {
    ===================================================================== */
 /* The same five tasks in every flow. */
 const TASKS = [
-  'You have just had lunch from a tub of biscuits: all the glucose biscuits, but only 10 of the cream crackers. Log this lunch with a photo of the tub.',
+  'Before lunch you took a picture of a tub of biscuits. You ate all the glucose biscuits but only 10 of the 14 cream crackers. Record this lunch in the app.',
   'How did your lunch compare with your lunch target? Find one thing to do differently next time.',
-  'Find out what Fitgems are.',
   'You now remember that you ate 12 cream crackers, not 10. Change your saved lunch.',
   'Start logging another meal with a photo, then stop before anything is saved.',
+  'Yesterday’s lunch was one plate of rice, dal and aloo gobi that you cooked at home. You took a picture of it before eating, and you ate everything except half of the rice. Record yesterday’s lunch in the app.',
 ];
 const DISCLAIMER = 'Nothing leaves this page and nothing is stored.';
 function statusBarHtml() {
-  return `<div class="statusbar" aria-hidden="true"><span id="sbTime">12:44</span><span class="island"></span><span class="sb-right"><svg width="18" height="12" viewBox="0 0 18 12"><rect x="0" y="8" width="3" height="4" rx="1" fill="currentColor"/><rect x="5" y="5.5" width="3" height="6.5" rx="1" fill="currentColor"/><rect x="10" y="3" width="3" height="9" rx="1" fill="currentColor"/><rect x="15" y="0" width="3" height="12" rx="1" fill="currentColor"/></svg>5G<svg width="27" height="13" viewBox="0 0 27 13"><rect x=".5" y=".5" width="23" height="12" rx="3.5" fill="none" stroke="currentColor" opacity=".5"/><rect x="2.5" y="2.5" width="15" height="8" rx="2" fill="currentColor"/><rect x="24.5" y="4.5" width="2" height="4" rx="1" fill="currentColor" opacity=".5"/></svg></span></div>`;
+  return `<div class="statusbar" aria-hidden="true"><span id="sbTime">${NOW_CLOCK}</span><span class="island"></span><span class="sb-right"><svg width="18" height="12" viewBox="0 0 18 12"><rect x="0" y="8" width="3" height="4" rx="1" fill="currentColor"/><rect x="5" y="5.5" width="3" height="6.5" rx="1" fill="currentColor"/><rect x="10" y="3" width="3" height="9" rx="1" fill="currentColor"/><rect x="15" y="0" width="3" height="12" rx="1" fill="currentColor"/></svg>5G<svg width="27" height="13" viewBox="0 0 27 13"><rect x=".5" y=".5" width="23" height="12" rx="3.5" fill="none" stroke="currentColor" opacity=".5"/><rect x="2.5" y="2.5" width="15" height="8" rx="2" fill="currentColor"/><rect x="24.5" y="4.5" width="2" height="4" rx="1" fill="currentColor" opacity=".5"/></svg></span></div>`;
 }
 function setupChrome(cfg) {
   document.title = cfg.title;
@@ -347,7 +410,8 @@ function trackersHtml() {
     <section class="tracker"><h3>Water</h3><div class="tv">${icon('glass')}<span><b>${S.water}</b>/12 glasses</span></div><div class="stepper sm"><button class="step-btn" data-act="water" data-d="-1" aria-label="One glass less" ${S.water <= 0 ? 'disabled' : ''}>${icon('minus')}</button><button class="step-btn" data-act="water" data-d="1" aria-label="One glass more">${icon('plus')}</button></div></section>
   </div>`;
 }
-const loggedMeals = () => S.meals.slice().sort((a, b) => MEALS.findIndex(m => m.key === a.meal) - MEALS.findIndex(m => m.key === b.meal));
+/* Home shows today only: a meal logged for yesterday is kept but not listed */
+const loggedMeals = () => S.meals.filter(m => (m.day || DAY_LABEL) === DAY_LABEL).sort((a, b) => MEALS.findIndex(m => m.key === a.meal) - MEALS.findIndex(m => m.key === b.meal));
 function mealSummary(m) { return counted(m.items).map(i => foodName(i)).join(', '); }
 /* today's meals, logged ones first in meal order, then the main meals still to log */
 function mealRowsHtml(opts = {}) {
@@ -356,7 +420,7 @@ function mealRowsHtml(opts = {}) {
   ['lunch', 'esnack', 'dinner'].filter(k => !logged.some(m => m.meal === k)).forEach(k => rows.push(`<div class="mealrow todo"><span class="ph" aria-hidden="true">${icon('plate')}</span><span class="grow"><span class="t">${esc(mealName(k))}</span><span class="s">Not logged yet</span></span></div>`));
   return rows.join('');
 }
-function dayKcal() { return r0(S.meals.reduce((a, m) => a + totals(m.items).kcal, 0)); }
+function dayKcal() { return r0(loggedMeals().reduce((a, m) => a + totals(m.items).kcal, 0)); }
 function tabBarHtml(centre) {
   const tabs = [['home', 'Home', 'home'], ['programs', 'Programs', 'clipboard']];
   if (centre) tabs.push(['centre', centre.label, centre.icon]);
@@ -374,12 +438,12 @@ function viewfinderHtml(extra = '') {
 }
 const galleryBtn = (label = 'Your photos') => `<button class="galbtn" data-act="gallery"><span class="gthumb"><img src="${ART.tub}" alt=""></span><span>${esc(label)}</span></button>`;
 const shutterBtn = () => `<button class="shutter" data-act="shoot" aria-label="Take photo"><i></i></button>`;
-/* examples for photo tips */
+/* examples for photo tips: the same one good and one bad example in every flow */
 const EXAMPLES = {
   good: { img: 'plate', cls: '', mark: 'good', title: 'One plate, from above', text: 'Only the food you will eat, in good light' },
   blurry: { img: 'plate', cls: 'blur', mark: 'bad', title: 'Blurry or dark', text: 'We may miss foods or count them wrong' },
-  cut: { img: 'plate', cls: 'cut', mark: 'bad', title: 'Food cut off or at an angle', text: 'We cannot see how much there is' },
 };
+const TIP_KEYS = ['good', 'blurry'];
 function exampleHtml(k) {
   const e = EXAMPLES[k];
   return `<div class="ex"><span class="ex-img ${e.cls}"><img src="${ART[e.img]}" alt=""><span class="ex-mark ${e.mark}">${icon(e.mark === 'good' ? 'check' : 'x')}</span></span><span class="ex-text"><b>${e.mark === 'good' ? 'Good: ' : 'Avoid: '}${esc(e.title)}</b><span>${esc(e.text)}</span></span></div>`;
@@ -387,15 +451,17 @@ function exampleHtml(k) {
 function tipsSheet(keys) {
   return () => `<div class="grab"></div>${sheetHead('Photo tips')}<div class="sheet-body"><div style="display:grid;gap:16px">${keys.map(exampleHtml).join('')}</div></div><div class="sheet-foot"><button class="btn secondary" data-act="closeSheet">Close</button></div>`;
 }
+/* newest first: the tub taken before today's lunch, this morning's breakfast (already logged)
+   and yesterday's lunch plate */
 function gallerySheet(title = 'Your photos') {
-  const items = [['tub', 'Today, 12:45 PM', true], ['chai', 'Today, 8:30 AM', false], ['plate', 'Yesterday, 1:10 PM', false]];
-  return () => `<div class="grab"></div>${sheetHead(title)}<div class="sheet-body"><div class="gallery">${items.map(([k, t, ok]) => `<button class="gitem ${ok ? '' : 'off'}" data-act="${ok ? 'pickPhoto' : 'pickOther'}"><span class="gimg"><img src="${ART[k]}" alt=""></span><span>${esc(t)}</span></button>`).join('')}</div><p class="small muted" style="margin:14px 0 0;line-height:1.45">In this prototype only today’s 12:45 PM photo can be logged.</p></div><div class="sheet-foot"><button class="btn secondary" data-act="closeSheet">Cancel</button></div>`;
+  const items = [['tub', PHOTOS.tub.label, 'pickPhoto'], ['chai', 'Today, 8:30 AM', 'pickOther'], ['thali', PHOTOS.thali.label, 'pickPhoto']];
+  return () => `<div class="grab"></div>${sheetHead(title)}<div class="sheet-body"><div class="gallery">${items.map(([k, t, act]) => `<button class="gitem ${act === 'pickOther' ? 'off' : ''}" data-act="${act}" data-k="${k}"><span class="gimg"><img src="${ART[k]}" alt=""></span><span>${esc(t)}</span></button>`).join('')}</div></div><div class="sheet-foot"><button class="btn secondary" data-act="closeSheet">Cancel</button></div>`;
 }
 
 /* ---- steppers, score, bars ---- */
 function stepperHtml(it, size = '', label = true) {
-  const fd = FOODS[it.food];
-  return `<div class="stepper ${size}" role="group" aria-label="${esc(foodName(it))}: how many"><button class="step-btn" data-act="qty" data-id="${it.id}" data-d="-1" aria-label="One ${fd.unit} less" ${it.qty <= 0 ? 'disabled' : ''}>${icon('minus')}</button><span class="step-val" data-fk="v-${it.id}"><b class="num">${it.qty}</b>${label ? `<span>${unitWord(fd, it.qty)}</span>` : ''}</span><button class="step-btn" data-act="qty" data-id="${it.id}" data-d="1" aria-label="One ${fd.unit} more">${icon('plus')}</button></div>`;
+  const fd = FOODS[it.food]; const one = fd.byWeight ? `${fd.step} g` : `One ${fd.unit}`;
+  return `<div class="stepper ${size}" role="group" aria-label="${esc(foodName(it))}: how ${fd.byWeight ? 'much' : 'many'}"><button class="step-btn" data-act="qty" data-id="${it.id}" data-d="-1" aria-label="${one} less" ${it.qty <= 0 ? 'disabled' : ''}>${icon('minus')}</button><span class="step-val" data-fk="v-${it.id}"><b class="num">${it.qty}</b>${label ? `<span>${unitWord(fd, it.qty)}</span>` : ''}</span><button class="step-btn" data-act="qty" data-id="${it.id}" data-d="1" aria-label="${one} more">${icon('plus')}</button></div>`;
 }
 function scoreHtml(sc, opts = {}) {
   const segs = Array.from({ length: 10 }, (_, i) => `<i class="${i < sc.score ? 'f' : ''}"></i>`).join('');
@@ -428,9 +494,6 @@ function mealPickerSheet(current) {
 function addFoodSheet() {
   return () => `<div class="grab"></div>${sheetHead('Add a food')}<div class="sheet-body"><p class="small muted" style="margin:0 0 12px">Foods you often add to lunch</p><div class="rows">${ADDABLE.map(k => { const fd = FOODS[k]; return `<button class="row" data-act="addFood" data-k="${k}"><span class="grow"><span class="t">${esc(fd.name)}</span><span class="s">1 ${esc(fd.unit)} (${fd.g} ${fd.gu || 'g'}) · ${fd.kcal} kcal</span></span><span class="addpill">${icon('plus')}Add</span></button>`; }).join('')}</div></div><div class="sheet-foot"><button class="btn secondary" data-act="closeSheet">Cancel</button></div>`;
 }
-function fitgemsSheet() {
-  return () => `<div class="grab"></div>${sheetHead('What are Fitgems?')}<div class="sheet-body"><div style="display:flex;gap:14px;align-items:flex-start"><span style="flex:none;width:48px;height:48px;border-radius:14px;background:#FDEBF4;display:grid;place-items:center">${GEM.replace('class="ic gem"', 'class="ic gem" style="width:30px;height:30px"')}</span><p class="p" style="margin:0">Fitgems are reward points. You get them for healthy habits, such as logging a meal or finishing a session. You got ${FITGEMS} for logging this ${S.draft ? mealLower(S.draft.meal) : 'lunch'}.</p></div></div><div class="sheet-foot"><button class="btn secondary" data-act="closeSheet">Close</button></div>`;
-}
 function rebrandSheet() {
   return () => `<div class="grab"></div>${sheetHead('Fitterfly is now PB Health')}<div class="sheet-body"><p class="p" style="margin:0 0 8px">Your progress is saved. You can keep using this app as before.</p></div><div class="sheet-foot"><button class="btn secondary" data-act="closeSheet">Close</button></div>`;
 }
@@ -445,12 +508,14 @@ function logListHtml(items, approx = 'about ') {
 }
 
 /* ---- draft and saving (shared model) ---- */
-function newDraft() { return { id: uid('m'), meal: 'lunch', time: PHOTO_TIME, photo: 'tub', items: detectedItems(), editing: false, saved: false }; }
+/* the meal takes its day and time from the photo, so a meal logged after eating, or the next
+   day, lands at the time it was eaten */
+function newDraft() { const p = curPhoto(); return { id: uid('m'), meal: PHOTOS[p.key].meal, day: p.day, time: p.time, photo: p.key, items: detectedItems(p.key), editing: false, saved: false }; }
 function draftFromMeal(m) { const d = clone(m.draft); d.editing = true; d.saved = false; return d; }
 function saveDraft() {
   const d = S.draft;
   S.undo = { meals: clone(S.meals), draft: clone(d) };
-  const m = { id: d.id, meal: d.meal, time: d.time, photo: d.photo, items: clone(counted(d.items)), draft: clone(d) };
+  const m = { id: d.id, meal: d.meal, day: d.day, time: d.time, photo: d.photo, items: clone(counted(d.items)), draft: clone(d) };
   S.meals = S.meals.filter(x => x.id !== d.id).concat(m);
   d.saved = true; S.savedId = m.id;
   return m;
@@ -465,9 +530,8 @@ function sharedActions(A) {
   A.nip = d => notInPrototype(d.what);
   A.water = d => { S.water = clamp(S.water + Number(d.d), 0, 12); render(); };
   A.rebrand = () => openSheet(rebrandSheet());
-  A.fitgems = () => { hideToast(); openSheet(fitgemsSheet()); };
   A.gallery = () => openSheet(gallerySheet(App.cfg.galleryTitle));
-  A.pickOther = () => toast('In this prototype, use today’s 12:45 PM photo of the biscuit tub.');
+  A.pickOther = () => toast('This morning’s breakfast is already logged.');
   A.changeMeal = () => openSheet(mealPickerSheet(S.draft.meal));
   A.pickMeal = d => { S.draft.meal = d.k; closeSheet(); toast(`Meal changed to ${mealLower(d.k)}.`); };
   A.addFoodOpen = () => openSheet(addFoodSheet());
@@ -481,7 +545,7 @@ function sharedActions(A) {
 /* ---- boot ---- */
 function boot(cfg) {
   App.cfg = cfg;
-  S = Object.assign({ screen: 'home', meals: [clone(BREAKFAST)], draft: null, water: 4, savedId: null, undo: null }, cfg.state ? cfg.state() : {});
+  S = Object.assign({ screen: 'home', meals: [clone(BREAKFAST)], draft: null, photo: null, water: 4, savedId: null, undo: null, undoLeft: 0 }, cfg.state ? cfg.state() : {});
   App.state = S;
   $('#sb').outerHTML = statusBarHtml();
   sharedActions(App.actions);
