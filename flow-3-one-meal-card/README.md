@@ -1,0 +1,35 @@
+# Flow 3: One meal card
+
+The fewest steps. From the photo on, every screen is a state of one scrolling meal card: analysing, review, saved, insights. Each correction shows its effect at once in a live nutrition summary.
+
+**Live:** <https://codewtirtha.github.io/meal-log-prototypes/flow-3-one-meal-card/>
+
+![Flow 3, screens 1 to 9](preview.jpg)
+
+## Screen by screen
+
+| Screen | The brief | In the prototype |
+|---|---|---|
+| 1. Home (top) | A raised centre tab "Log meal" with a camera icon replaces Trackers; the rebrand as a dismissible line at the foot of Home | Tab bar: Home, Programs, Log meal, Academy, Store. The raised button sits in a bump of the tab bar rather than floating over the page |
+| 2. Home scrolled | Meal card listing today's meals, "Tap a meal to edit"; no banner or "Add Meal" link | As asked. "Fitterfly is now PB Health. Your progress is saved." sits at the foot of Home with a close (✕) |
+| 3. Method sheet | "Photo" pre-selected with a primary "Take photo" button and the hint "Photo works best for a single plate"; first-time coach mark "Klik means logging by photo"; Search and Talk as small links; close (✕) | As asked. The coach mark has "Got it" and shows only the first time |
+| 4. Camera | Caption "We estimate each food's amount. Everything in the frame is counted; keep only what you'll eat."; "Photo tips" chip with one good and two bad examples; "Your recent photos" | As asked: good "One plate, from above"; avoid "Blurry or dark" and "Food cut off or at an angle" |
+| 5. Card, analysing | Photo at the top; two placeholder rows "Finding foods..."; "Retake" link | As asked; the analysis takes 5 s. ✕ in the top bar stops and goes home |
+| 6. Card, review | "Cream crackers, 14 pieces" and "Glucose biscuits, 6 pieces", each marked "Estimate", with large numbers and steppers; meal chip "Lunch"; below, a live nutrition summary that updates when a count changes; "Add food" row; primary "Save meal" | As asked. A changed count is tagged "Your count", and the summary values that changed flash briefly |
+| 7. Card, saved | Snackbar "Lunch saved. Undo"; score 4/10 with its scale | After saving, the card scrolls so the score sits just above the snackbar |
+| 8. Card | Chip "+10 Fitgems for logging. What are Fitgems?" under the score | Appears under the score a moment after the first save |
+| 9. Card, insights | Labelled lunch target; the verdict as a suggestion, "Next time, try fewer crackers or add some protein" | "Lunch target 443 kcal", the suggestion, then bars for calories, carbs, protein, fat and fibre with labelled targets and directional colours |
+
+## Behaviour worth knowing
+
+- "Edit foods" on the saved card, or tapping lunch on Home ("Tap a meal to edit"), turns the card back into the review state with "Save changes".
+- Undo on the snackbar turns the card back into the review state, with nothing saved (or the earlier version restored, after an edit).
+- The suggestion is written from the amounts: the food with the most carbohydrate when carbs or calories are over, and "add some protein" when protein is under.
+
+## Files
+
+- `index.html`: the page and Flow 3's own styles.
+- `flow.js`: Flow 3's screens and actions.
+- Shared theme, data and screens: [`../shared`](../shared).
+
+Tasks, theme, deployment and screenshots: see the [main README](../README.md).

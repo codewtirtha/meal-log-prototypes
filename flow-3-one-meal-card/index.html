@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0D1925">
+<title>Meal log — Flow 3</title>
+<meta name="description" content="Clickable prototype for logging a meal with a photo.">
+<link rel="stylesheet" href="../shared/fonts.css">
+<link rel="stylesheet" href="../shared/theme.css">
+<style>
+/* ===== Flow 3: One meal card. From the photo on, every step is a state of one card. ===== */
+
+/* Home: rebrand as a dismissible line at the foot */
+.f3-rebrand { display: flex; align-items: center; gap: 6px; margin-top: 16px; padding: 6px 4px 6px 16px; border-radius: 16px; background: var(--violet-50); font-size: 16px; line-height: 1.4; color: var(--text); }
+.f3-rebrand .grow { flex: 1; }
+.f3-rebrand b { color: var(--ink); }
+.f3-tapnote { display: flex; align-items: center; gap: 6px; margin: 8px 0 0; font-size: 16px; color: var(--muted); }
+.f3-tapnote .ic { width: 18px; height: 18px; }
+
+/* method sheet: Photo chosen, one "Take photo" button, Search and Talk as small links */
+.f3-pick { display: flex; align-items: center; gap: 14px; width: 100%; padding: 14px; border-radius: 18px; border: 2px solid var(--blue); background: var(--blue-50); text-align: left; }
+.f3-pick .mi { width: 52px; height: 52px; flex: none; border-radius: 16px; background: #fff; color: var(--blue); display: grid; place-items: center; }
+.f3-pick .mi .ic { width: 28px; height: 28px; }
+.f3-pick .grow { flex: 1; min-width: 0; }
+.f3-pick b { display: block; font-size: 19px; color: var(--ink); }
+.f3-pick span.h { display: block; margin-top: 3px; font-size: 16px; line-height: 1.35; color: var(--text); }
+.f3-pick .ok { width: 28px; height: 28px; flex: none; border-radius: 50%; background: var(--blue); color: #fff; display: grid; place-items: center; }
+.f3-pick .ok .ic { width: 16px; height: 16px; stroke-width: 3; }
+.f3-coach { position: relative; display: flex; align-items: center; gap: 12px; margin: 14px 0 2px; padding: 12px 8px 12px 16px; border-radius: 16px; background: var(--navy); color: #fff; font-size: 17px; line-height: 1.35; }
+.f3-coach::before { content: ''; position: absolute; top: -7px; left: 34px; width: 16px; height: 16px; background: var(--navy); transform: rotate(45deg); border-radius: 3px; }
+.f3-coach .grow { flex: 1; }
+.f3-coach button { flex: none; min-height: 44px; padding: 0 14px; border-radius: 12px; border: 0; background: rgba(255, 255, 255, .16); color: #fff; font-weight: 700; font-size: 16px; }
+.f3-or { display: flex; align-items: center; justify-content: center; gap: 4px; margin-top: 8px; font-size: 16px; color: var(--muted); }
+.f3-or .linkbtn { font-size: 16px; padding: 0 8px; }
+
+/* camera */
+.f3-camtools { display: flex; justify-content: center; margin: 0 0 14px; }
+
+/* the meal card */
+.f3-page { background: var(--page); }
+.f3-card { margin: 14px 16px 18px; border-radius: 24px; background: var(--card); border: 1px solid var(--line); overflow: hidden; }
+.f3-card > .photo { border-radius: 0; aspect-ratio: 16 / 9; }
+.home-grey.f3-foot { padding-bottom: 44px; }
+.f3-meta { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 14px 16px 10px; }
+.f3-meta .when { font-size: 16px; color: var(--muted); }
+.f3-row { padding: 14px 16px; border-top: 1px solid var(--line); }
+.f3-rtop { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.f3-rtop.stack { display: block; }
+.f3-rtop .nm { font-size: 18px; font-weight: 600; color: var(--ink); line-height: 1.3; }
+.f3-rtop .nm small { display: block; font-size: 16px; font-weight: 400; color: var(--muted); }
+.f3-rctl { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 10px; }
+.f3-rctl .side { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; text-align: right; font-size: 16px; color: var(--muted); line-height: 1.3; }
+.f3-rctl .side b { display: block; font-size: 18px; color: var(--ink); }
+.stepper.lg .step-btn { width: 56px; height: 56px; border-radius: 18px; }
+.stepper.lg .step-val { min-width: 76px; }
+.stepper.lg .step-val b { font-size: 40px; font-family: var(--font-head); font-weight: 600; }
+.f3-add { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 60px; padding: 0 16px; border: 0; border-top: 1px solid var(--line); background: transparent; color: var(--pink); font-weight: 600; font-size: 17px; text-align: left; }
+.f3-add .ic { width: 22px; height: 22px; }
+.skel-row { display: flex; align-items: center; gap: 12px; padding: 16px; border-top: 1px solid var(--line); }
+.skel { height: 18px; border-radius: 9px; background: linear-gradient(90deg, #EDF0F5 25%, #E0E5EE 50%, #EDF0F5 75%); background-size: 200% 100%; animation: shimmer 1.3s linear infinite; }
+.skel.sq { width: 44px; height: 44px; flex: none; border-radius: 12px; }
+@keyframes shimmer { from { background-position: 200% 0; } to { background-position: -200% 0; } }
+.f3-finding { display: flex; align-items: center; gap: 10px; padding: 14px 16px 4px; font-size: 17px; font-weight: 600; color: var(--ink); }
+.f3-retake { padding: 6px 16px 10px; border-top: 1px solid var(--line); }
+.f3-live { margin: 4px 16px 16px; padding: 14px 14px 12px; border-radius: 16px; background: var(--card-grey); }
+.f3-live .lh b { display: block; font-size: 18px; color: var(--ink); }
+.f3-live .lh span { display: block; margin-top: 2px; font-size: 16px; color: var(--muted); }
+.f3-big { margin: 8px 0 0; font-size: 17px; color: var(--text); }
+.f3-big b { font-family: var(--font-head); font-size: 28px; font-weight: 600; color: var(--ink); }
+.f3-mini { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 12px; margin-top: 14px; }
+.f3-mini > div { padding: 8px 10px; border-radius: 12px; background: #fff; }
+.f3-mini .ml { display: block; font-size: 16px; color: var(--muted); }
+.f3-mini .mv { display: block; margin-top: 2px; font-size: 17px; color: var(--ink); font-variant-numeric: tabular-nums; }
+.f3-mini .mv b { font-size: 20px; }
+.f3-mini .nstat { margin-top: 2px; }
+.flash { animation: flash .7s ease-out; }
+@keyframes flash { from { background: var(--blue-100); } to { background: #fff; } }
+.f3-sec { padding: 16px; border-top: 1px solid var(--line); }
+.f3-sec .h3 { margin-bottom: 12px; }
+.f3-gemchip { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; margin-top: 12px; padding: 8px 14px 8px 10px; border-radius: 18px; background: #FDEBF4; font-size: 16px; line-height: 1.35; color: var(--ink); }
+.f3-gemchip .ic { width: 22px; height: 22px; }
+.f3-gemchip .linkbtn { min-height: 44px; font-size: 16px; }
+.f3-target { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 0 0 14px; padding: 10px 14px; border-radius: 14px; background: var(--card-grey); font-size: 17px; }
+.f3-target b { font-size: 18px; color: var(--ink); }
+.f3-edit { margin: 0 16px 6px; }
+.f3-advice { margin: 0 0 18px; }
+.f3-gemchip.pop { animation: toastIn .3s ease-out; }
+</style>
+</head>
+<body>
+<div class="proto-bar"></div>
+<div class="stage">
+  <aside class="about" aria-label="Tasks for this prototype"></aside>
+  <div class="device-wrap">
+    <div class="device">
+      <div class="phone" id="phone">
+        <div id="sb"></div>
+        <div id="screen"></div>
+        <div id="overlay"></div>
+        <div id="toast" aria-live="polite"></div>
+        <div class="homebar"></div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="../shared/core.js"></script>
+<script src="flow.js"></script>
+</body>
+</html>

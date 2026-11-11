@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0D1925">
+<title>Meal log prototypes</title>
+<meta name="description" content="Clickable prototypes for logging a meal with a photo.">
+<link rel="stylesheet" href="shared/fonts.css">
+<link rel="stylesheet" href="shared/theme.css">
+<style>
+/* The site root: a plain list of the three prototypes, without flow names, so it is safe to show to participants. */
+body { background: var(--page); }
+.wrap { max-width: 440px; margin: 0 auto; padding: 48px 16px; }
+h1 { margin: 0 0 8px; font-family: var(--font-head); font-weight: 600; font-size: 28px; color: var(--ink); }
+p { margin: 0 0 24px; font-size: 17px; line-height: 1.45; color: var(--text); }
+.links { display: grid; gap: 12px; }
+.links a { display: flex; align-items: center; justify-content: space-between; min-height: 64px; padding: 0 20px; border-radius: var(--r-btn); background: var(--navy); color: #fff; font-weight: 600; font-size: 18px; text-decoration: none; }
+.links a:focus-visible { outline: 3px solid var(--blue); outline-offset: 3px; }
+.note { margin-top: 24px; font-size: 16px; color: var(--muted); }
+</style>
+</head>
+<body>
+<main class="wrap">
+  <h1>Meal log prototypes</h1>
+  <p>Three clickable versions of logging a meal with a photo. Open the one you were given.</p>
+  <nav class="links" aria-label="Prototypes">
+    <a href="flow-1-ask-before-saving/">Flow 1 <span aria-hidden="true">›</span></a>
+    <a href="flow-2-show-the-estimate/">Flow 2 <span aria-hidden="true">›</span></a>
+    <a href="flow-3-one-meal-card/">Flow 3 <span aria-hidden="true">›</span></a>
+  </nav>
+  <p class="note">Nothing leaves these pages and nothing is stored.</p>
+</main>
+</body>
+</html>
