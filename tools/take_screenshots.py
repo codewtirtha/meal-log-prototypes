@@ -120,7 +120,8 @@ FLOWS = {
             ("Screen 4c - Your recent photos", "PROTO.act('gallery')", None),
             ("Screen 5 - Meal card, analysing", "PROTO.act('pickPhoto', {k: 'tub'})", 5),
             ("Screen 6a - Meal card, review", "PROTO.act('finishAnalysis')", 6),
-            ("Screen 6b - Meal card, crackers changed to 10, live summary", CHANGE_FIRST.format(n=4, d=-1) + "; " + SCROLL_TO.format(sel="#live", off=200), None),
+            ("Screen 6b - Not this food, look-alikes", "PROTO.act('notThis', {id: PROTO.S.draft.items[1].id})", None),
+            ("Screen 6c - Meal card, crackers changed to 10, live summary", "PROTO.closeSheet(); " + CHANGE_FIRST.format(n=4, d=-1) + "; " + SCROLL_TO.format(sel="#live", off=200), None),
             ("Screen 7 - Meal card, saved, with a 10-second Undo", "PROTO.act('save')", 7),
             ("Screen 8 - Meal card, insights and suggestion", "PROTO.hideToast(); " + SCROLL_TO.format(sel="#insights", off=0), 8),
             ("Screen 9 - Meal card, nutrients", SCROLL_END, 9),
@@ -130,6 +131,7 @@ FLOWS = {
             ("Task 5c - Meal card, rice changed to 100 g", CHANGE_FIRST.format(n=4, d=-1) + "; " + SCROLL_TO.format(sel="#live", off=420), None),
             ("Task 5d - Meal card, saved", "PROTO.act('save')", None),
             ("Task 5e - Meal card, insights", "PROTO.hideToast(); " + SCROLL_TO.format(sel="#insights", off=0), None),
+            ("Task 5f - Not this food on the plate (via Edit foods)", "PROTO.act('editCard'); PROTO.act('notThis', {id: PROTO.S.draft.items[2].id})", None),
         ],
     },
 }

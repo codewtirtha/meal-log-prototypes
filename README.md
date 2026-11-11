@@ -173,6 +173,12 @@ So that the three flows can be compared fairly, these changes were made to all t
 - Flow 2's centre tab is now "Log a meal", the same name as its Home button (before: "Log food").
 - Photo tips show the same one good and one bad example everywhere (Flow 3 used to show two bad examples).
 
+And three changes to Flow 3 only, to close gaps the review found:
+
+- "Klik" now appears in Flow 3, as a label on the Photo option, so the coach mark "Klik means logging by photo" explains a word that is on screen.
+- The "Estimate" tag no longer disappears after saving: each saved food keeps "Estimate" or "Your count", and the insights carry an "Estimate" tag while any amount is still estimated.
+- Flow 3 can now change a food's identity: "Not this food" under each found food opens its look-alikes, as Flow 1 and Flow 2 already could.
+
 ## Earlier designs
 
 The two earlier prototypes, Design 1 ("simplified") and Design 2 ("detailed"), were replaced by these three flows. They are kept in the git history under the tag `designs-v1`.

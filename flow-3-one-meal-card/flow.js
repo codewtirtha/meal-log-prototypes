@@ -11,17 +11,21 @@
                         the foot of Home
    2 Home scrolled ... Meal card lists today's meals, "Tap a meal to edit";
                         no banner, no "Add Meal" link
-   3 Method sheet .... Photo pre-selected, "Take photo", hint, first-time
-                        coach mark "Klik means logging by photo", Search and
-                        Talk as small links, close
+   3 Method sheet .... Photo pre-selected, labelled with the app's name for it,
+                        "Klik"; "Take photo", hint, first-time coach mark
+                        "Klik means logging by photo", Search and Talk as
+                        small links, close
    4 Camera .......... "We estimate each food's amount. Everything in the frame
                         is counted; keep only what you'll eat." + "Photo tips"
                         (one good and one bad example, as in Flows 1 and 2)
    5 Card, analysing . photo, two "Finding foods..." placeholder rows, "Retake"
    6 Card, review .... large counts with steppers, "Estimate" tags, meal chip,
-                        live nutrition summary, "Add food", "Save meal"
-   7 Card, saved ..... snackbar "Lunch saved. Undo (10)", score 4/10 with its scale
-   8 Card, insights .. labelled lunch target, the verdict as a suggestion
+                        "Not this food" with look-alikes, live nutrition
+                        summary, "Add food", "Save meal"
+   7 Card, saved ..... snackbar "Lunch saved. Undo (10)", score 4/10 with its scale;
+                        each food keeps its "Estimate" or "Your count" tag
+   8 Card, insights .. "Estimate" tag, labelled lunch target, the verdict as a
+                        suggestion
    9 Card, insights .. nutrient bars with labelled targets, directional colours
    (Fitgems were removed from all three flows.)
    ===================================================================== */
@@ -52,7 +56,7 @@ screens.home = () => `<section class="screen" data-status="light">
 /* ---------- 3 Method sheet ---------- */
 function methodSheet() {
   return () => `<div class="grab"></div>${sheetHead('Log a meal')}<div class="sheet-body">
-    <div class="f3-pick" role="radio" aria-checked="true"><span class="mi">${icon('camera')}</span><span class="grow"><b>Photo</b><span class="h">Photo works best for a single plate</span></span><span class="ok">${icon('check')}</span></div>
+    <div class="f3-pick" role="radio" aria-checked="true"><span class="mi">${icon('camera')}</span><span class="grow"><b>Photo <span class="f3-klik">Klik</span></b><span class="h">Photo works best for a single plate</span></span><span class="ok">${icon('check')}</span></div>
     ${S.coachSeen ? '' : `<div class="f3-coach" role="note"><span class="grow">Klik means logging by photo</span><button data-act="coachOk">Got it</button></div>`}
   </div><div class="sheet-foot"><button class="btn" data-act="takePhoto">${icon('camera')}Take photo</button>
     <div class="f3-or">Or use<button class="linkbtn" data-act="nip" data-what="Search">${icon('search')}Search</button>·<button class="linkbtn" data-act="nip" data-what="Talk">${icon('mic')}Talk</button></div></div>`;
@@ -79,18 +83,37 @@ function liveHtml(items, mealKey) {
     <div class="f3-mini">${['carbs', 'protein', 'fat', 'fibre'].map(key => { const r = R[key]; return `<div data-n="${key}"><span class="ml">${r.label}</span><span class="mv"><b>${r0(r.val)}</b> of ${r.target} g</span>${r.status === 'within' ? '<span class="nstat within">Within target</span>' : statusHtml(r, 'status')}</div>`; }).join('')}</div>
   </section>`;
 }
+/* The amount's tag stays with the food from review to saved card to insights:
+   "Estimate" until the person changes the amount, then "Your count". */
+function tagHtml(it) {
+  if (it.added) return `<span class="tag mine">${icon('plus')}Added</span>`;
+  if (it.touched) return `<span class="tag mine">${icon('check')}Your count</span>`;
+  return `<span class="tag est">${icon('approx')}Estimate</span>`;
+}
+const hasEstimate = items => counted(items).some(i => !i.added && !i.touched);
 function reviewRowHtml(it) {
   const fd = FOODS[it.food];
-  const tag = it.added ? `<span class="tag mine">${icon('plus')}Added</span>` : it.touched ? `<span class="tag mine">${icon('check')}Your count</span>` : `<span class="tag est">${icon('approx')}Estimate</span>`;
+  const swap = !it.added && it.alts && it.alts.length ? `<div class="f3-swap"><button class="linkbtn" data-act="notThis" data-id="${it.id}">${icon('ban')}Not this food</button></div>` : '';
   return `<div class="f3-row"><div class="f3-rtop stack"><span class="nm">${esc(fd.name)}, ${esc(qtyText(it))}</span></div>
-    <div class="f3-rctl">${stepperHtml(it, 'lg')}<span class="side">${tag}<b class="num">${kcalOf(it)} kcal</b><span>${it.qty ? (byWeight(it) ? '' : esc(gramsText(it))) : 'Not counted'}</span></span></div></div>`;
+    <div class="f3-rctl">${stepperHtml(it, 'lg')}<span class="side">${tagHtml(it)}<b class="num">${kcalOf(it)} kcal</b><span>${it.qty ? (byWeight(it) ? '' : esc(gramsText(it))) : 'Not counted'}</span></span></div>${swap}</div>`;
 }
 function savedRowHtml(it) {
-  return `<div class="f3-row"><div class="f3-rtop"><span class="nm">${esc(foodName(it))}<small>${esc(amountLine(it))}</small></span><span class="num" style="font-weight:600;font-size:17px">${kcalOf(it)} kcal</span></div></div>`;
+  return `<div class="f3-row"><div class="f3-rtop"><span class="nm">${esc(foodName(it))}<small>${esc(amountLine(it))}</small></span><span class="side">${tagHtml(it)}<b class="num">${kcalOf(it)} kcal</b></span></div></div>`;
+}
+/* "Not this food": the foods it could be, as in Flow 1's sheet and Flow 2's chips */
+function notThisSheet(it) {
+  const wt = byWeight(it); const kinds = [it.detFood, ...it.alts];
+  const kcalNote = k => (FOODS[k].byWeight ? `${r0(FOODS[k].kcal * 100)} kcal per 100 g` : `${r0(FOODS[k].kcal)} kcal a piece`);
+  return () => `<div class="grab"></div>${sheetHead(wt ? 'What is it?' : 'What are they?')}<div class="sheet-body">
+    <p class="small muted" style="margin:0 0 12px;line-height:1.4">${wt ? `We thought this was ${esc(FOODS[it.detFood].name.toLowerCase())}. Choose what it is.` : `We thought these were ${esc(FOODS[it.detFood].name.toLowerCase())}. Choose what they are.`}</p>
+    <div class="rows">${kinds.map(k => `<button class="row ${k === it.food ? 'on' : ''}" data-act="swapFood" data-id="${it.id}" data-k="${k}" aria-pressed="${k === it.food}"><span class="radio"></span><span class="grow"><span class="t">${esc(FOODS[k].name)}</span><span class="s">${kcalNote(k)}</span></span></button>`).join('')}
+      <button class="row" data-act="nip" data-what="Searching for another food"><span class="grow"><span class="t">Something else</span><span class="s">Search for it</span></span>${icon('search')}</button>
+    </div></div><div class="sheet-foot"><button class="btn secondary" data-act="closeSheet">Cancel</button></div>`;
 }
 function insightsHtml(m) {
   const items = m.items; const R = rowsByKey(nutrientRows(items, m.meal)); const mn = mealName(m.meal);
-  return `<section class="f3-sec" id="insights" aria-labelledby="insH"><h3 class="h3" id="insH">How this ${mealLower(m.meal)} compares</h3>
+  const basis = hasEstimate(items) ? `<span class="tag est">${icon('approx')}Estimate</span>` : `<span class="tag mine">${icon('check')}Your counts</span>`;
+  return `<section class="f3-sec" id="insights" aria-labelledby="insH"><div class="f3-insh"><h3 class="h3" id="insH">How this ${mealLower(m.meal)} compares</h3>${basis}</div>
     <div class="f3-target"><span>${esc(mn)} target</span><b>${R.kcal.target} kcal</b></div>
     <div class="advice f3-advice"><span class="ai">${icon('bulb')}</span><div><b>A suggestion</b><p>${esc(suggestion(items, m.meal))}</p></div></div>
     <div class="nlist">${['kcal', 'carbs', 'protein', 'fat', 'fibre'].map(key => { const r = R[key]; const unit = key === 'kcal' ? 'kcal' : 'g'; return `<div><div class="nrow-top"><span class="nl">${r.label}</span><span class="nv"><b class="num">${r0(r.val)}</b> of ${r.target} ${unit}</span></div>${barHtml(r, key === 'kcal' ? { tlabel: `${mn} target` } : {})}${statusHtml(r, 'status')}</div>`; }).join('')}</div>
@@ -173,6 +196,11 @@ const actions = A => {
     const before = totals(S.draft.items); const it = draftItem(d.id);
     stepQty(it, d.d); it.touched = true;
     render(); bumpValue(d.id); flashChanged(before);
+  };
+  A.notThis = d => openSheet(notThisSheet(draftItem(d.id)));
+  A.swapFood = d => {
+    const before = totals(S.draft.items); const it = draftItem(d.id); it.food = d.k;
+    closeSheet(); flashChanged(before); toast(`Changed to ${FOODS[d.k].name.toLowerCase()}.`);
   };
   A.discard = () => openSheet(discardSheet(S.draft && S.draft.editing));
   A.discardYes = () => {
